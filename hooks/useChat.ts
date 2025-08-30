@@ -135,7 +135,8 @@ export const useChat = () => {
             const thinkingMessage: ChatMessage = { id: `model-thinking-${Date.now()}`, role: ChatRole.Model, parts: [{ type: 'text', text: `فكرة رائعة! جارٍ تصميم موقع ويب عن: ${prompt}...` }]};
             addMessageToCurrentChat(thinkingMessage);
             
-            const code = await generateWebsite(prompt, 'tailwind');
+            // FIX: Added the missing 'language' argument to the generateWebsite call.
+            const code = await generateWebsite(prompt, 'tailwind', 'Arabic');
             const blob = new Blob([code], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const modelMessage: ChatMessage = { id: `model-${Date.now()}`, role: ChatRole.Model, parts: [{ type: 'text', text: `لقد انتهيت من بناء الموقع! يمكنك معاينته من خلال الرابط التالي:\n\n[افتح معاينة الموقع](${url})` }]};

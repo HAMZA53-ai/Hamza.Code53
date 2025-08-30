@@ -4,11 +4,13 @@ export enum ChatRole {
   Error = 'error',
 }
 
-// FIX: Add 'messenger' to View type to support the new Messenger section.
-export type View = 'chat' | 'image' | 'video' | 'website' | 'book' | 'messenger' | 'creations' | 'settings';
+export type View = 'chat' | 'tools' | 'blog' | 'creations' | 'settings';
 
-export type CreationType = 'Image' | 'Video' | 'Website' | 'Book';
+// FIX: Add new creation types for all generated content.
+export type CreationType = 'Image' | 'Video' | 'Website' | 'Logo' | 'EditedImage' | 'Slides';
 export type CreationStatus = 'pending' | 'completed' | 'failed';
+
+export type WebTechStack = 'html-css' | 'tailwind' | 'react-tailwind';
 
 export interface Creation {
   id: string;
@@ -18,16 +20,7 @@ export interface Creation {
   timestamp: number;
   data?: any; // Could be image URLs, video URL, HTML code etc.
   error?: string;
-}
-
-export interface BookContent {
-  title: string;
-  cover_query: string;
-  chapters: {
-    title: string;
-    content: string;
-  }[];
-  cover_url?: string;
+  techStack?: WebTechStack;
 }
 
 export interface ImagePart {
@@ -50,7 +43,7 @@ export interface DebugInfo {
 }
 
 export interface ChatMessage {
-  id: string;
+  id:string;
   role: ChatRole;
   parts: MessagePart[];
   debugInfo?: DebugInfo;
@@ -63,24 +56,15 @@ export interface Conversation {
   messages: ChatMessage[];
 }
 
-// --- Messenger Types ---
-// FIX: Add types for the new Messenger feature.
-export interface AIFriend {
-  id: string;
-  name: string;
-  avatarUrl: string;
-  systemInstruction: string;
-  initialMessage: string;
+export type QuizType = 'multiple-choice' | 'true-false';
+
+export interface QuizQuestion {
+    question: string;
+    options?: string[];
+    answer: string;
 }
 
-export interface MessengerMessage {
-    id: string;
-    role: 'user' | 'model';
-    text: string;
-    timestamp: number;
-}
-
-export interface FriendConversation {
-    friendId: string;
-    messages: MessengerMessage[];
+export interface Slide {
+    title: string;
+    content: string; // Bullet points as a single string
 }

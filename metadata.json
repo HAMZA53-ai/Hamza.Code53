@@ -1,5 +1,7 @@
 {
   "name": "حمزة سوبر بلس",
   "description": "تطبيق دردشة ذكي مدعوم من Gemini API، مصمم ليكون مساعدك الشخصي الفائق. يمكنك طرح الأسئلة، والحصول على إجابات، وحتى تحليل الصور.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "camera"
+  ]
 }

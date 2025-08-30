@@ -3,16 +3,15 @@ import ChatWindow from './components/ChatWindow';
 import Header from './components/Header';
 import { useChat } from './hooks/useChat';
 import HistorySidebar from './components/HistorySidebar';
-import ImageGenerator from './components/ImageGenerator';
-import VideoGenerator from './components/VideoGenerator';
-import WebsiteGenerator from './components/WebsiteGenerator';
-import BookGenerator from './components/BookGenerator';
-// FIX: Import the new Messenger component.
-import Messenger from './components/messenger/Messenger';
+// ADD: Import the new unified Tools component.
+import Tools from './components/Tools';
+import Blog from './components/Blog';
 import Creations from './components/Creations';
 import Settings from './components/Settings';
 import { View } from './types';
 import * as settingsService from './services/settingsService';
+
+// REMOVED: Individual tool component imports are no longer needed here.
 
 const App: React.FC = () => {
   const {
@@ -76,17 +75,12 @@ const App: React.FC = () => {
             isDevMode={isDevMode}
           />
         );
-      case 'image':
-        return <ImageGenerator />;
-      case 'video':
-        return <VideoGenerator />;
-      case 'website':
-        return <WebsiteGenerator />;
-      case 'book':
-        return <BookGenerator />;
-      // FIX: Add a case to render the Messenger component.
-      case 'messenger':
-        return <Messenger />;
+      // ADD: A new case for the unified 'tools' view.
+      case 'tools':
+        return <Tools />;
+      // REMOVED: Cases for individual tools like 'image', 'video', 'website', etc.
+      case 'blog':
+        return <Blog />;
       case 'creations':
         return <Creations />;
       case 'settings':

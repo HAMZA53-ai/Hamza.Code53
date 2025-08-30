@@ -5,15 +5,13 @@ import DeleteIcon from './icons/DeleteIcon';
 import { formatTimestamp } from '../utils/dateFormatter';
 import ChatBubbleIcon from './icons/ChatBubbleIcon';
 import HistoryIcon from './icons/HistoryIcon';
-import ImageIcon from './icons/ImageIcon';
-import VideoIcon from './icons/VideoIcon';
-import WebsiteIcon from './icons/WebsiteIcon';
-import BookIcon from './icons/BookIcon';
-// FIX: Import MessengerIcon for the new section.
-import MessengerIcon from './icons/MessengerIcon';
+// ADD: Import ToolsIcon for the new tools section link.
+import ToolsIcon from './icons/ToolsIcon';
+import ArticleIcon from './icons/ArticleIcon';
 import CreationsIcon from './icons/CreationsIcon';
 import SettingsIcon from './icons/SettingsIcon';
 
+// REMOVED: Unused icons for individual tools.
 
 interface HistorySidebarProps {
   history: Conversation[];
@@ -84,53 +82,30 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({
       >
         <div className="p-4 border-b border-gray-200 dark:border-slate-700 flex flex-col gap-2 flex-shrink-0 min-w-[17rem] lg:min-w-[19rem]">
             <button
-              onClick={() => onSetView('chat')}
+              onClick={onNewChat}
               className={getButtonClass('chat')}
-              title="محادثة"
+              title="محادثة جديدة"
             >
               <NewChatIcon className="w-5 h-5 text-teal-500 dark:text-teal-400" />
-              <span>محادثة</span>
+              <span>محادثة جديدة</span>
             </button>
-            {/* FIX: Add button for the new Messenger view. */}
+            {/* ADD: New unified Tools button */}
             <button
-              onClick={() => onSetView('messenger')}
-              className={getButtonClass('messenger')}
-              title="ماسنجر"
+              onClick={() => onSetView('tools')}
+              className={getButtonClass('tools')}
+              title="الأدوات"
             >
-              <MessengerIcon className="w-5 h-5 text-pink-500 dark:text-pink-400" />
-              <span>ماسنجر</span>
+              <ToolsIcon className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
+              <span>الأدوات</span>
             </button>
+            {/* REMOVED: Individual tool buttons (Image, Video, Website, etc.) */}
             <button
-              onClick={() => onSetView('image')}
-              className={getButtonClass('image')}
-              title="توليد الصور"
+              onClick={() => onSetView('blog')}
+              className={getButtonClass('blog')}
+              title="مقالات / مدونة"
             >
-              <ImageIcon className="w-5 h-5 text-purple-500 dark:text-purple-400" />
-              <span>صور</span>
-            </button>
-            <button
-              onClick={() => onSetView('video')}
-              className={getButtonClass('video')}
-              title="توليد الفيديو"
-            >
-              <VideoIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-              <span>فيديو</span>
-            </button>
-            <button
-              onClick={() => onSetView('website')}
-              className={getButtonClass('website')}
-              title="توليد موقع ويب"
-            >
-              <WebsiteIcon className="w-5 h-5 text-green-500 dark:text-green-400" />
-              <span>موقع ويب</span>
-            </button>
-            <button
-              onClick={() => onSetView('book')}
-              className={getButtonClass('book')}
-              title="ناسج الكتب"
-            >
-              <BookIcon className="w-5 h-5 text-yellow-600 dark:text-yellow-500" />
-              <span>كتاب</span>
+              <ArticleIcon className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+              <span>مقالات / مدونة</span>
             </button>
         </div>
         

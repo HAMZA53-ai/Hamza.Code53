@@ -1,5 +1,5 @@
-import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse, Type, Content } from "@google/genai";
-import { ChatMessage, ChatRole, DebugInfo, BookContent } from "../types";
+import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse, Type, Content, Modality } from "@google/genai";
+import { ChatMessage, ChatRole, DebugInfo, QuizQuestion, QuizType, Slide, WebTechStack } from "../types";
 import * as apiKeyService from './apiKeyService';
 
 const handleApiError = (error: unknown, context: string): Error => {
@@ -97,28 +97,6 @@ export const runQuery = async (conversationHistory: ChatMessage[]): Promise<{ te
   }
 };
 
-// FIX: Add a new function to handle messenger queries with custom personalities.
-export const runMessengerQuery = async (
-  contents: Content[],
-  systemInstruction: string
-): Promise<string> => {
-    try {
-        const ai = getAiInstance();
-        const response: GenerateContentResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: contents,
-            config: {
-                systemInstruction: systemInstruction,
-            },
-        });
-        return response.text;
-    } catch (error) {
-        const apiError = handleApiError(error, "إرسال رسالة إلى الصديق");
-        return apiError.message;
-    }
-};
-
-
 export const checkApiKeyStatus = async (): Promise<{ success: boolean; message: string; }> => {
     try {
         getApiKey(); // Check if key exists first
@@ -205,28 +183,116 @@ export const getVideoOperationStatus = async (operation: any): Promise<any> => {
   }
 };
 
-export type WebTechStack = 'html-css' | 'tailwind' | 'react-tailwind';
+const getWebsiteSystemInstruction = (techStack: WebTechStack, language: string): string => {
+  const langCode = language.split(' ')[0].toLowerCase();
+  const languageDirection = ['Arabic', 'Hebrew', 'Persian', 'Urdu'].includes(language) ? 'rtl' : 'ltr';
+  const htmlTag = `<html lang="${langCode}" dir="${languageDirection}">`;
 
-const getWebsiteSystemInstruction = (techStack: WebTechStack): string => {
+  const commonInstructions = `
+You are an expert web developer with a powerful "Smart Layout Engine". Your task is to generate a COMPLETE, SINGLE-FILE website based on the user's prompt, making intelligent decisions about the structure.
+
+**Step 1: Analyze the User's Request**
+First, determine the TYPE of website the user wants:
+  A) A **Standard Website** (e.g., for a business, portfolio, restaurant, marketing page).
+  B) A **Complex Application Simulation** (e.g., "a page like Facebook", "a Trello dashboard", "a Twitter feed").
+
+**Step 2: Choose the Correct Structure based on your analysis**
+
+**IF Type A (Standard Website):**
+You MUST build a professional, multi-section website with the following components in order:
+*   A sticky/fixed navigation bar (Header).
+*   A compelling "Hero" section.
+*   A "Features" or "Services" section.
+*   An "About Us" section.
+*   A "Testimonials" section.
+*   A "Contact Us" form.
+*   A "Footer".
+This structure is proven and effective for business and portfolio sites.
+
+**IF Type B (Complex Application Simulation):**
+You MUST **IGNORE** the standard structure above. Instead, you must create a custom layout that accurately mimics the requested application.
+*   **Deconstruct the UI:** Think like a UI/UX designer. Break down the application into its core components (e.g., for Facebook: a left sidebar for navigation, a central news feed with post cards, a right sidebar for contacts).
+*   **Build the Layout:** Use divs and CSS (or Tailwind classes) to create the necessary multi-column layout.
+*   **Create Components:** Populate the layout with placeholder components that look like the real application (e.g., create styled divs for posts, each with a user avatar, name, text content, and like/comment buttons).
+*   **Focus on Fidelity:** The goal is to create a high-fidelity, non-functional prototype that visually represents the user's request.
+
+**CRITICAL REQUIREMENTS FOR BOTH TYPES:**
+
+1.  **Content Language:** ALL text content (headings, paragraphs, button text, form labels, etc.) MUST be written in **${language}**.
+
+2.  **SEO & Accessibility:**
+    *   The HTML MUST include a relevant and descriptive \`<title>\` tag in the \`<head>\`. The title must be in **${language}**.
+    *   The HTML MUST include a relevant \`<meta name="description" content="...">\` tag in the \`<head>\`. The content must be in **${language}**.
+    *   ALL \`<img>\` tags MUST have a descriptive \`alt\` attribute. The alt text should also be in **${language}**.
+    *   Use semantic HTML5 tags like \`<header>\`, \`<nav>\`, \`<main>\`, \`<section>\`, \`<footer>\`. For complex layouts, use \`<div>\` with appropriate class names or ARIA roles.
+
+3.  **Images:** Use high-quality, professional placeholder images from picsum.photos. Use different, descriptive seeds for different images to ensure variety (e.g., seed/hero, seed/avatar1, seed/post_image, etc.).
+
+4.  **Output Format:** The final output MUST BE ONLY THE CODE. Do not include any explanations, comments, or markdown formatting (like \`\`\`html) outside the code itself. The code must be clean, well-formatted, and ready for production.
+`;
+
   switch (techStack) {
     case 'tailwind':
-      return "You are an expert web developer. Create a complete, professional, single-file HTML website. It MUST use Tailwind CSS via the official CDN script (`<script src=\"https://cdn.tailwindcss.com\"></script>`). All styling must be done with Tailwind utility classes. The code should be well-formatted, responsive, and ready to be used directly. The output must be only the HTML code, with no explanations or markdown formatting outside the HTML itself.";
+      return `${commonInstructions}
+**Technology Stack:**
+*   Create a single HTML file.
+*   It MUST use Tailwind CSS for all styling.
+*   It MUST include the official Tailwind CSS CDN script in the \`<head>\`: \`<script src="https://cdn.tailwindcss.com"></script>\`.
+*   The root element MUST be \`${htmlTag}\`.
+`;
     case 'react-tailwind':
-      return "You are an expert React developer. Create a single, complete JSX component file for a web page. The component should be self-contained and use Tailwind CSS for all styling. Assume the user has a React project set up with Tailwind CSS configured. Do not include `<html>` or `<body>` tags. The output must be only the JSX code for the main component, with no explanations or markdown formatting outside the code itself.";
+      return `You are an expert React developer with a powerful "Smart Layout Engine". Create a single, complete JSX component file for a web page. Assume the user has a React project set up with Tailwind CSS configured. Do not include \`<html>\` or \`<body>\` tags.
+
+**Step 1: Analyze the User's Request**
+First, determine the TYPE of page the user wants:
+  A) A **Standard Website Page** (e.g., for a business, portfolio, restaurant).
+  B) A **Complex Application Simulation** (e.g., "a component for a Facebook-like page", "a Trello dashboard").
+
+**Step 2: Choose the Correct Structure**
+
+**IF Type A (Standard Website Page):**
+You MUST build a professional, multi-section component with a root \`<div>\` containing:
+*   A sticky/fixed navigation bar (\`<header>\`).
+*   A "Hero" section.
+*   A "Features" or "Services" section.
+*   An "About Us" section.
+*   A "Testimonials" section.
+*   A "Contact Us" form.
+*   A "Footer" (\`<footer>\`).
+
+**IF Type B (Complex Application Simulation):**
+You MUST **IGNORE** the standard structure. Instead, create a custom layout that accurately mimics the requested application.
+*   **Deconstruct the UI:** Break the application into its core components (e.g., for Facebook: a left sidebar, a central feed with post card components, a right sidebar).
+*   **Build the Layout:** Use divs with Tailwind classes for multi-column layouts.
+*   **Create Components:** Create placeholder components that look like the real application.
+
+**CRITICAL REQUIREMENTS FOR BOTH TYPES:**
+
+1.  **Content Language:** ALL text content MUST be in **${language}**.
+2.  **Accessibility:** All \`<img>\` tags MUST have descriptive \`alt\` attributes in **${language}**.
+3.  **Images:** Use placeholder images from picsum.photos. Use different seeds.
+4.  **Output Format:** The output must be only the JSX code for the main component, with no explanations or markdown formatting. The component should be a default export.
+`;
     case 'html-css':
     default:
-      return "You are an expert web developer. Create a complete, professional, single-file HTML website with inline CSS inside a `<style>` tag. The code should be well-formatted, responsive, and ready to be used directly. Do not include any explanations or markdown formatting outside of the HTML code itself. The output must be only the HTML code.";
+      return `${commonInstructions}
+**Technology Stack:**
+*   Create a single HTML file.
+*   All CSS styling MUST be contained within a single \`<style>\` tag in the \`<head>\`. Make the design modern and responsive.
+*   The root element MUST be \`${htmlTag}\`.
+`;
   }
 };
 
-export const generateWebsite = async (prompt: string, techStack: WebTechStack): Promise<string> => {
+
+export const generateWebsite = async (prompt: string, techStack: WebTechStack, language: string): Promise<string> => {
   try {
     const ai = getAiInstance();
     const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: `Generate a complete, single-file website based on this prompt: "${prompt}"`,
       config: {
-        systemInstruction: getWebsiteSystemInstruction(techStack),
+        systemInstruction: getWebsiteSystemInstruction(techStack, language),
         responseMimeType: "text/plain",
       },
     });
@@ -237,40 +303,229 @@ export const generateWebsite = async (prompt: string, techStack: WebTechStack): 
   }
 };
 
-export const generateBookContent = async (topic: string): Promise<BookContent> => {
+export const explainConcept = async (topic: string): Promise<string> => {
     try {
         const ai = getAiInstance();
         const response: GenerateContentResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `Write a short, non-fiction book about the following topic: "${topic}". The book should have a clear title, a search query for a stock photo website to find a suitable cover image, and at least 3 chapters. Each chapter should have a title and a few paragraphs of content.`,
+            contents: `Explain this concept: "${topic}"`,
             config: {
-                responseMimeType: "application/json",
-                responseSchema: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING, description: "The title of the book." },
-                        cover_query: { type: Type.STRING, description: "A concise search query for a stock photo website (like Unsplash) to find a suitable cover image." },
-                        chapters: {
-                            type: Type.ARRAY,
-                            description: "An array of chapters, each with a title and content.",
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    title: { type: Type.STRING, description: "The title of the chapter." },
-                                    content: { type: Type.STRING, description: "The content of the chapter, written in paragraphs." }
-                                },
-                            }
-                        }
-                    },
-                },
+                systemInstruction: "You are an expert educator. Explain concepts in a clear, concise, and easy-to-understand way for a high school student. Use analogies, examples, and markdown for formatting.",
+                responseMimeType: "text/plain",
             },
         });
-        
+        return response.text;
+    } catch (error) {
+        throw handleApiError(error, "شرح المفهوم");
+    }
+};
+
+export const translateText = async (text: string, targetLanguage: string): Promise<string> => {
+    try {
+        const ai = getAiInstance();
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Translate the following text to ${targetLanguage}. Provide only the translated text: "${text}"`,
+            config: {
+                systemInstruction: "You are a professional translator. Provide only the translated text, without any additional comments or explanations.",
+                responseMimeType: "text/plain",
+            },
+        });
+        return response.text;
+    } catch (error) {
+        throw handleApiError(error, "ترجمة النص");
+    }
+};
+
+export const summarizeText = async (text: string): Promise<string> => {
+    try {
+        const ai = getAiInstance();
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Summarize the following text in a few key points: "${text}"`,
+            config: {
+                systemInstruction: "You are an expert at summarizing long texts. Extract the main ideas and present them as a concise summary. Use bullet points if appropriate.",
+                responseMimeType: "text/plain",
+            },
+        });
+        return response.text;
+    } catch (error) {
+        throw handleApiError(error, "تلخيص النص");
+    }
+};
+
+export const generateQuiz = async (text: string, type: QuizType, count: number): Promise<QuizQuestion[]> => {
+    try {
+        const ai = getAiInstance();
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Generate a quiz with ${count} questions of type '${type}' based on the following text. Ensure the questions are relevant and cover the main points of the text. For multiple-choice questions, provide 4 options.
+
+            Text: """
+            ${text}
+            """`,
+            config: {
+                systemInstruction: "You are an AI assistant designed to create educational quizzes. Generate high-quality questions based on the provided text and return the output in the specified JSON format. The answer for multiple-choice questions must be one of the provided options.",
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            question: { type: Type.STRING },
+                            options: {
+                                type: Type.ARRAY,
+                                items: { type: Type.STRING },
+                                description: 'An array of 4 potential answers for multiple-choice questions.',
+                                nullable: true
+                            },
+                            answer: { type: Type.STRING }
+                        },
+                        required: ['question', 'answer']
+                    }
+                }
+            }
+        });
+
+        // The response text is a JSON string, parse it.
         const jsonString = response.text.trim();
-        const bookContent: BookContent = JSON.parse(jsonString);
-        return bookContent;
+        const quizData: QuizQuestion[] = JSON.parse(jsonString);
+        return quizData;
 
     } catch (error) {
-        throw handleApiError(error, "توليد محتوى الكتاب");
+        throw handleApiError(error, "توليد الاختبار");
+    }
+};
+
+// ADD: Generic text tool function
+export const generateTextForTool = async (prompt: string, systemInstruction: string): Promise<string> => {
+  try {
+    const ai = getAiInstance();
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        systemInstruction: systemInstruction,
+      },
+    });
+    return response.text;
+  } catch (error) {
+    throw handleApiError(error, "توليد نص مخصص");
+  }
+};
+
+// ADD: Slides generation function
+export const generateSlides = async (topic: string): Promise<Slide[]> => {
+    try {
+        const ai = getAiInstance();
+        const response: GenerateContentResponse = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Create a concise and informative slide presentation on the topic: "${topic}". Generate 5 to 7 slides.`,
+            config: {
+                systemInstruction: "You are an expert at creating slide presentations. For each slide, provide a short title and 3-5 bullet points as a single string with each point starting with a hyphen.",
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            title: { type: Type.STRING },
+                            content: { type: Type.STRING, description: "A single string containing bullet points, each starting with '-' and separated by newlines." }
+                        },
+                        required: ['title', 'content']
+                    }
+                }
+            }
+        });
+        const jsonString = response.text.trim();
+        return JSON.parse(jsonString);
+    } catch (error) {
+        throw handleApiError(error, "توليد العروض التقديمية");
+    }
+};
+
+// FIX: Overhaul image editing function with robust error handling.
+export const editImage = async (base64ImageData: string, mimeType: string, prompt: string): Promise<string> => {
+    try {
+        const ai = getAiInstance();
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash-image-preview',
+            contents: {
+                parts: [
+                    { inlineData: { data: base64ImageData, mimeType: mimeType } },
+                    { text: prompt },
+                ],
+            },
+            config: {
+                responseModalities: [Modality.IMAGE, Modality.TEXT],
+            },
+        });
+
+        // Check for prompt feedback first, which indicates an issue before generation.
+        if (response.promptFeedback?.blockReason) {
+             throw new Error(`تم حظر الطلب بسبب سياسات السلامة (السبب: ${response.promptFeedback.blockReason}). يرجى تعديل الصورة أو الوصف.`);
+        }
+        
+        const candidate = response.candidates?.[0];
+
+        if (!candidate) {
+             throw new Error("لم يتم تلقي أي استجابة صالحة من النموذج.");
+        }
+        
+        // Check for finish reason on the candidate
+        if (candidate.finishReason && candidate.finishReason !== 'STOP') {
+            // Provide a more user-friendly message for SAFETY
+            if (candidate.finishReason === 'SAFETY') {
+                 throw new Error(`تعذر تعديل الصورة لأنها تنتهك سياسات السلامة. يرجى تجربة صورة أو وصف مختلف.`);
+            }
+            throw new Error(`فشل إنشاء الصورة. السبب: ${candidate.finishReason}.`);
+        }
+
+        const imagePart = candidate.content?.parts?.find(p => p.inlineData);
+
+        if (imagePart?.inlineData?.data) {
+            return imagePart.inlineData.data;
+        }
+        
+        const textPart = candidate.content?.parts?.find(p => p.text);
+        if (textPart?.text) {
+            throw new Error(`لم يتم إرجاع صورة. رد النموذج: "${textPart.text}"`);
+        }
+        
+        throw new Error("لم يتم العثور على صورة في استجابة النموذج. قد تكون الاستجابة فارغة أو غير متوقعة.");
+
+    } catch (error) {
+        // Updated to catch all our new specific error messages
+        if (error instanceof Error && (
+            error.message.includes('سياسات السلامة') || 
+            error.message.includes('فشل إنشاء الصورة') || 
+            error.message.includes('لم يتم إرجاع صورة') || 
+            error.message.includes('لم يتم العثور على صورة') ||
+            error.message.includes('لم يتم تلقي أي استجابة')
+        )) {
+            throw error;
+        }
+        throw handleApiError(error, "تحرير الصورة");
+    }
+};
+
+// ADD: Logo generation function
+export const generateLogo = async (prompt: string, style: string): Promise<string[]> => {
+    const fullPrompt = `${style} logo for ${prompt}, vector, simple, on a clean white background`;
+    try {
+        const ai = getAiInstance();
+        const response: GenerateImagesResponse = await ai.models.generateImages({
+            model: 'imagen-4.0-generate-001',
+            prompt: fullPrompt,
+            config: {
+                numberOfImages: 4,
+                outputMimeType: 'image/png',
+                aspectRatio: '1:1',
+            },
+        });
+
+        return response.generatedImages.map(img => `data:image/png;base64,${img.image.imageBytes}`);
+    } catch (error) {
+        throw handleApiError(error, "توليد الشعارات");
     }
 };

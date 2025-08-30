@@ -4,6 +4,7 @@ import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import VideoIcon from './icons/VideoIcon';
 import ExternalLinkIcon from './icons/ExternalLinkIcon';
+import BackIcon from './icons/BackIcon';
 
 const loadingMessages = [
     "جارٍ إعداد المشهد...",
@@ -14,12 +15,17 @@ const loadingMessages = [
     "قد يستغرق الأمر بضع دقائق، شكرًا لصبرك...",
 ];
 
-const VideoGenerator: React.FC = () => {
+interface VideoGeneratorProps {
+  onBack: () => void;
+}
+
+const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
     const [prompt, setPrompt] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
+    const [submittedPrompt, setSubmittedPrompt] = useState('');
     
     const intervalRef = useRef<number | null>(null);
     const messageIntervalRef = useRef<number | null>(null);
@@ -93,6 +99,7 @@ const VideoGenerator: React.FC = () => {
         setError(null);
         setVideoUrl(null);
         setLoadingMessage(loadingMessages[0]);
+        setSubmittedPrompt(prompt);
 
         creationIdRef.current = creationsService.addCreation({
             type: 'Video',
@@ -114,24 +121,30 @@ const VideoGenerator: React.FC = () => {
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <div className="p-4 md:p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
-                <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex flex-col gap-4">
-                    <h2 className="text-xl font-bold text-blue-600 dark:text-blue-300 mb-2 text-center">توليد الفيديو بالذكاء الاصطناعي</h2>
-                    <textarea
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="مثال: سيارة رياضية تسير بسرعة على طريق جبلي عند غروب الشمس..."
-                        className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                        rows={3}
-                        disabled={isLoading}
-                    />
-                    <button
-                        type="submit"
-                        disabled={isLoading || !prompt.trim()}
-                        className="w-full h-10 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors font-semibold flex items-center justify-center"
-                    >
-                        {isLoading ? 'جارٍ التوليد...' : 'توليد الفيديو'}
+                <div className="max-w-4xl mx-auto">
+                    <button onClick={onBack} className="flex items-center gap-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:opacity-80 transition-opacity mb-4">
+                        <BackIcon className="w-5 h-5" />
+                        العودة إلى الأدوات
                     </button>
-                </form>
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <h2 className="text-xl font-bold text-blue-600 dark:text-blue-300 mb-2 text-center">توليد الفيديو بالذكاء الاصطناعي</h2>
+                        <textarea
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder="مثال: سيارة رياضية تسير بسرعة على طريق جبلي عند غروب الشمس..."
+                            className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                            rows={3}
+                            disabled={isLoading}
+                        />
+                        <button
+                            type="submit"
+                            disabled={isLoading || !prompt.trim()}
+                            className="w-full h-10 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors font-semibold flex items-center justify-center"
+                        >
+                            {isLoading ? 'جارٍ التوليد...' : 'توليد الفيديو'}
+                        </button>
+                    </form>
+                </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
                 {isLoading && (
@@ -144,7 +157,10 @@ const VideoGenerator: React.FC = () => {
                 {error && <p className="text-center text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-800/20 p-3 rounded-lg">{error}</p>}
                 {videoUrl && (
                     <div className="max-w-2xl mx-auto">
-                        <h3 className="text-lg font-semibold mb-4 text-center">الفيديو الخاص بك جاهز!</h3>
+                        <div className="mb-4 bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">فيديو للوصف:</p>
+                            <p className="font-semibold text-slate-800 dark:text-slate-200">{submittedPrompt}</p>
+                        </div>
                         <video controls src={videoUrl} className="w-full rounded-lg shadow-lg" />
                          <div className="mt-4 flex flex-col sm:flex-row gap-2">
                             <a
