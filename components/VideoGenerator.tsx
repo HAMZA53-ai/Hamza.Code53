@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { generateVideo, getVideoOperationStatus } from '../services/aiService';
+import { generateVideo, getVideoOperationStatus, getActiveApiKey } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import VideoIcon from './icons/VideoIcon';
@@ -61,7 +61,7 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
                     const downloadLink = updatedOperation.response?.generatedVideos?.[0]?.video?.uri;
                     if (downloadLink && creationIdRef.current) {
                         try {
-                             const apiKey = process.env.API_KEY;
+                             const apiKey = getActiveApiKey();
                              if (!apiKey) throw new Error("مفتاح API غير مكون.");
                              
                              const response = await fetch(`${downloadLink}&key=${apiKey}`);

@@ -1,7 +1,16 @@
 
 import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse, Type, Content, Modality } from "@google/genai";
-// FIX: Import VideoAnalysisResult type.
 import { ChatMessage, ChatRole, DebugInfo, QuizQuestion, QuizType, Slide, WebTechStack, MessagePart, ChatMode, VideoAnalysisResult } from "../types";
+import { getGeminiApiKey } from './apiKeyService';
+
+// --- Centralized API Key Management ---
+export const getActiveApiKey = (): string | null => {
+    const userKey = getGeminiApiKey();
+    if (userKey) {
+        return userKey;
+    }
+    return process.env.API_KEY || null;
+}
 
 // --- Generic Error Handling ---
 const handleApiError = (error: unknown, context: string): Error => {
@@ -11,7 +20,7 @@ const handleApiError = (error: unknown, context: string): Error => {
             return new Error("للاستفادة من ميزات توليد الصور والفيديو، يجب أن يكون حساب Google Cloud الخاص بك مفوترًا. يرجى تفعيل الفوترة في مشروعك على Google Cloud ثم المحاولة مرة أخرى.");
         }
         if (error.message.includes('API key not valid')) {
-            return new Error("مفتاح API غير صالح. يرجى التحقق منه في صفحة الإعدادات.");
+            return new Error("مفتاح API غير صالح. يرجى التحقق منه في صفحة الإعدادات أو استخدام زر التفعيل المجاني.");
         }
         
         if (error.message.includes('Insufficient Balance')) {
@@ -41,7 +50,7 @@ const handleApiError = (error: unknown, context: string): Error => {
 
 // --- Gemini Implementation ---
 const getGeminiInstance = (): GoogleGenAI => {
-    const apiKey = process.env.API_KEY;
+    const apiKey = getActiveApiKey();
     if (!apiKey) {
         throw new Error("لم يتم تكوين مفتاح Google Gemini API. يرجى الاتصال بمسؤول التطبيق.");
     }
@@ -374,23 +383,22 @@ export const generateSlides = async (topic: string): Promise<Slide[]> => {
     return JSON.parse(jsonString.trim());
 };
 
-// FIX: Add summarizeAndQuizVideo function for video analysis.
 export const summarizeAndQuizVideo = async (videoUrl: string): Promise<VideoAnalysisResult> => {
     const jsonString = await runTextGeneration(
-        [{ type: 'text', text: `Analyze the video from this URL: ${videoUrl}. Provide a concise summary of its content and then generate a 5-question multiple-choice quiz based on the video's key points. The video is likely a YouTube video.` }],
-        "You are an AI assistant specialized in analyzing video content from URLs. You will provide a summary and a quiz in the specified JSON format. Your capabilities for analyzing videos are experimental and may rely on transcriptions or other available metadata.",
+        [{ type: 'text', text: `Analyze the video from this URL: ${videoUrl}. Provide a concise summary of its content in Arabic and then generate a 5-question multiple-choice quiz in Arabic based on the video's key points. The video is likely a YouTube video. If you cannot access the video content, you MUST report an error and not invent information.` }],
+        "You are an AI assistant specialized in analyzing video content from URLs. You will provide a summary and a quiz in ARABIC, in the specified JSON format. Your capabilities for analyzing videos are experimental; if you cannot access the content, you MUST state that you cannot access it in your error message. Do not invent content.",
         {
             type: Type.OBJECT,
             properties: {
-                summary: { type: Type.STRING, description: "A concise summary of the video content." },
+                summary: { type: Type.STRING, description: "A concise summary of the video content in Arabic." },
                 quiz: {
                     type: Type.ARRAY,
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            question: { type: Type.STRING },
-                            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'An array of 4 potential answers.' },
-                            answer: { type: Type.STRING }
+                            question: { type: Type.STRING, description: "The quiz question in Arabic." },
+                            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'An array of 4 potential answers in Arabic.' },
+                            answer: { type: Type.STRING, description: "The correct answer in Arabic." }
                         },
                         required: ['question', 'options', 'answer']
                     }

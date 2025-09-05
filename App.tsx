@@ -13,6 +13,7 @@ import * as settingsService from './services/settingsService';
 import WelcomeScreen from './components/WelcomeScreen';
 import * as userService from './services/userService';
 import ApiBanner from './components/ApiBanner';
+import { getGeminiApiKey } from './services/apiKeyService';
 
 const App: React.FC = () => {
   const {
@@ -35,8 +36,8 @@ const App: React.FC = () => {
   useEffect(() => {
     // Cyberpunk theme is always dark
     document.documentElement.classList.add('dark');
-    // Check if the API key is configured.
-    if (!process.env.API_KEY) {
+    // Check if the API key is configured on initial load.
+    if (!process.env.API_KEY && !getGeminiApiKey()) {
       setIsApiConfigured(false);
     }
   }, []);
@@ -44,6 +45,10 @@ const App: React.FC = () => {
   const handleSetUserName = (name: string) => {
     userService.saveUserName(name);
     setUserName(name);
+    // After user action on welcome screen, re-check for the key
+    if (getGeminiApiKey()) {
+        setIsApiConfigured(true);
+    }
     if (history.length === 0) {
         startNewChat();
     }
