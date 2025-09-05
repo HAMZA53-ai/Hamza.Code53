@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse, Type, Content, Modality } from "@google/genai";
-import { ChatMessage, ChatRole, DebugInfo, QuizQuestion, QuizType, Slide, WebTechStack, MessagePart, ChatMode } from "../types";
+// FIX: Import VideoAnalysisResult type.
+import { ChatMessage, ChatRole, DebugInfo, QuizQuestion, QuizType, Slide, WebTechStack, MessagePart, ChatMode, VideoAnalysisResult } from "../types";
 
 // --- Generic Error Handling ---
 const handleApiError = (error: unknown, context: string): Error => {
@@ -368,6 +369,34 @@ export const generateSlides = async (topic: string): Promise<Slide[]> => {
                 },
                 required: ['title', 'content']
             }
+        }
+    );
+    return JSON.parse(jsonString.trim());
+};
+
+// FIX: Add summarizeAndQuizVideo function for video analysis.
+export const summarizeAndQuizVideo = async (videoUrl: string): Promise<VideoAnalysisResult> => {
+    const jsonString = await runTextGeneration(
+        [{ type: 'text', text: `Analyze the video from this URL: ${videoUrl}. Provide a concise summary of its content and then generate a 5-question multiple-choice quiz based on the video's key points. The video is likely a YouTube video.` }],
+        "You are an AI assistant specialized in analyzing video content from URLs. You will provide a summary and a quiz in the specified JSON format. Your capabilities for analyzing videos are experimental and may rely on transcriptions or other available metadata.",
+        {
+            type: Type.OBJECT,
+            properties: {
+                summary: { type: Type.STRING, description: "A concise summary of the video content." },
+                quiz: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            question: { type: Type.STRING },
+                            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'An array of 4 potential answers.' },
+                            answer: { type: Type.STRING }
+                        },
+                        required: ['question', 'options', 'answer']
+                    }
+                }
+            },
+            required: ['summary', 'quiz']
         }
     );
     return JSON.parse(jsonString.trim());

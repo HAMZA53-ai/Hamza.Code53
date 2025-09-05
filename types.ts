@@ -72,3 +72,9 @@ export interface Slide {
 }
 
 export type ChatMode = 'default' | 'google_search' | 'quick_response' | 'learning';
+
+// FIX: Add VideoAnalysisResult type for video processing tool.
+export interface VideoAnalysisResult {
+    summary: string;
+    quiz: QuizQuestion[];
+}

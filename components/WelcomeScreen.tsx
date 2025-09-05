@@ -23,7 +23,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onSetName }) => {
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-[var(--neon-cyan)] [text-shadow:var(--glow-cyan)]">أهلاً بك في MZ</h1>
         <p className="text-slate-400 mb-6">مساعدك الشخصي الفائق. لنبدأ، ما هو اسمك؟</p>
         <p className="text-xs text-slate-500 mb-8">
-          انا نموذج كبير برمجني حمزة محمد الحسيني و طورني حمزة محمد الحسيني
+          انا نموذج كبير برمجني حمزة محمد الحسيني و طورني حمزة محمد سعيد
         </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
