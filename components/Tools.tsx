@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ToolsIcon from './icons/ToolsIcon';
 
@@ -77,7 +76,7 @@ interface ToolCardProps {
 const ToolCard: React.FC<ToolCardProps> = ({ icon, title, description, onClick }) => (
     <div
         onClick={onClick}
-        className={`bg-[var(--panel-dark)] backdrop-blur-sm rounded-lg p-4 border border-[var(--border-color)] transition-all duration-300 flex flex-col items-center text-center relative cursor-pointer hover:border-[var(--neon-cyan)] hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:-translate-y-2`}
+        className={`bg-[var(--panel-dark)] backdrop-blur-sm rounded-lg p-4 border border-[var(--border-color)] transition-all duration-300 flex flex-col items-center text-center relative cursor-pointer hover:border-[var(--neon-cyan)] hover:shadow-[var(--glow-active)] hover:-translate-y-2`}
     >
         <div className="w-10 h-10 mb-3 text-[var(--neon-cyan)] [filter:drop-shadow(0_0_3px_var(--neon-cyan))]">{icon}</div>
         <h3 className="text-base font-bold text-slate-200 mb-2">{title}</h3>

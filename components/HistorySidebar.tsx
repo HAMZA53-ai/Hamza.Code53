@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Conversation, MessagePart, View } from '../types';
 import NewChatIcon from './icons/NewChatIcon';
@@ -56,11 +55,12 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({
   }
 
   const getButtonClass = (view: View) => {
-    const baseClass = "flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors w-full text-right";
-    const textClass = 'text-slate-300 hover:bg-slate-700/50 hover:text-white';
-    const activeClass = currentView === view ? 'bg-slate-700/80 text-[var(--neon-cyan)]' : '';
+    const baseClass = "flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 w-full text-right";
+    const activeClass = currentView === view 
+      ? 'bg-[var(--panel-interactive-hover)] text-[var(--neon-cyan)] shadow-[var(--glow-cyan)]' 
+      : 'text-slate-300 hover:bg-[var(--panel-interactive-hover)] hover:text-white';
     
-    return `${baseClass} ${textClass} ${activeClass}`;
+    return `${baseClass} ${activeClass}`;
   }
 
   return (
@@ -130,12 +130,12 @@ const HistorySidebar: React.FC<HistorySidebarProps> = ({
                         }}
                         className={`group flex items-center gap-3 p-3 my-1 rounded-lg transition-colors text-right relative overflow-hidden ${
                             isChatActive
-                            ? 'bg-slate-700/80 text-white'
-                            : 'hover:bg-slate-700/50 text-slate-300'
+                            ? 'bg-[var(--panel-interactive-hover)] text-white'
+                            : 'hover:bg-[var(--panel-interactive-hover)] text-slate-300'
                         }`}
                         >
                         {isChatActive && (
-                            <div className="absolute right-0 top-0 bottom-0 w-1 bg-[var(--neon-cyan)] shadow-[var(--glow-cyan)] rounded-r-sm"></div>
+                            <div className="absolute right-0 top-0 bottom-0 w-1 bg-[var(--neon-cyan)] shadow-[var(--glow-active)] rounded-r-sm"></div>
                         )}
 
                         <ChatBubbleIcon className="w-5 h-5 flex-shrink-0 text-slate-400" />

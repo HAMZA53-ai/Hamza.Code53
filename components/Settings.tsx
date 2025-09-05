@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface SettingsProps {
@@ -35,14 +34,14 @@ const Settings: React.FC<SettingsProps> = ({ currentUserName, onUpdateUserName }
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-800/50 border border-[var(--border-color)] rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-[var(--neon-cyan)] focus:outline-none transition"
+                className="w-full bg-slate-800/50 border border-[var(--border-color)] rounded-lg p-3 text-slate-200 focus:ring-2 focus:ring-[var(--neon-cyan)] focus:shadow-[var(--glow-active)] focus:outline-none transition-all duration-300"
               />
             </div>
             <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={!name.trim() || name.trim() === currentUserName}
-                className="px-5 py-2 bg-[var(--neon-cyan)] text-black rounded-lg hover:shadow-[var(--glow-cyan)] disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none transition-all font-semibold"
+                className="px-5 py-2 bg-[var(--neon-cyan)] text-black rounded-lg hover:shadow-[var(--glow-active)] disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none transition-all font-semibold"
               >
                 حفظ التغييرات
               </button>

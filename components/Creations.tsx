@@ -148,7 +148,7 @@ const Creations: React.FC = () => {
      <button
         onClick={() => setFilter(type)}
         className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-          filter === type ? 'border-b-2 border-indigo-400 text-white' : 'text-slate-400 hover:text-white'
+          filter === type ? 'border-b-2 border-[var(--neon-cyan)] text-[var(--neon-cyan)] [text-shadow:var(--glow-cyan-light)]' : 'text-slate-400 hover:text-white'
         }`}
       >
         {label} ({count})

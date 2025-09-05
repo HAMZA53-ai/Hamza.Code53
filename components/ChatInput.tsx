@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, ChangeEvent, KeyboardEvent } from 'react';
 import PaperclipIcon from './icons/PaperclipIcon';
 import SendIcon from './icons/SendIcon';
@@ -69,8 +68,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
       disabled={disabled}
       className={`flex-1 flex flex-col items-center justify-center p-1 rounded-lg transition-all text-xs duration-200 ${
         chatMode === mode 
-          ? 'bg-[var(--neon-cyan)] text-black shadow-[var(--glow-cyan-light)] font-bold' 
-          : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'
+          ? 'bg-[var(--neon-cyan)] text-black shadow-[var(--glow-active)] font-bold' 
+          : 'text-slate-400 hover:bg-[var(--panel-interactive-hover)] hover:text-slate-200'
       }`}
       title={label}
     >
@@ -129,7 +128,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
         <button
           onClick={handleSend}
           disabled={disabled || (!text.trim() && !image)}
-          className="p-2 sm:p-3 bg-[var(--neon-cyan)] text-black rounded-lg hover:shadow-[var(--glow-cyan)] disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300"
+          className="p-2 sm:p-3 bg-[var(--neon-cyan)] text-black rounded-lg hover:shadow-[var(--glow-active)] disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300"
           aria-label="Send message"
         >
           <SendIcon className="w-5 h-5 sm:w-6 sm:h-6" />
