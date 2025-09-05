@@ -1,3 +1,4 @@
+
 export enum ChatRole {
   User = 'user',
   Model = 'model',
@@ -6,8 +7,7 @@ export enum ChatRole {
 
 export type View = 'chat' | 'tools' | 'blog' | 'creations' | 'settings';
 
-// FIX: Add new creation types for all generated content.
-export type CreationType = 'Image' | 'Video' | 'Website' | 'Logo' | 'EditedImage' | 'Slides';
+export type CreationType = 'Image' | 'Website' | 'Logo' | 'EditedImage' | 'Slides' | 'Video';
 export type CreationStatus = 'pending' | 'completed' | 'failed';
 
 export type WebTechStack = 'html-css' | 'tailwind' | 'react-tailwind';
@@ -38,6 +38,7 @@ export type MessagePart = ImagePart | TextPart;
 
 export interface DebugInfo {
   responseTimeMs: number;
+  provider: string;
   model: string;
   totalTokens?: number;
 }
@@ -47,6 +48,7 @@ export interface ChatMessage {
   role: ChatRole;
   parts: MessagePart[];
   debugInfo?: DebugInfo;
+  groundingSources?: { title: string; uri: string }[];
 }
 
 export interface Conversation {
@@ -68,3 +70,5 @@ export interface Slide {
     title: string;
     content: string; // Bullet points as a single string
 }
+
+export type ChatMode = 'default' | 'google_search' | 'quick_response' | 'learning';

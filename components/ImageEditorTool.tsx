@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
 import ImageIcon from './icons/ImageIcon';
 import CameraIcon from './icons/CameraIcon';
-import { editImage } from '../services/geminiService';
+import { editImage } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 
 type EditMode = 'upscale' | 'cartoonify' | 'background-remove' | 'custom';
@@ -13,6 +14,7 @@ interface ImageEditorToolProps {
   icon: React.ReactNode;
   onBack: () => void;
   editMode: EditMode;
+  onNavigateToSettings: () => void;
 }
 
 const getPromptForMode = (mode: EditMode, customPrompt: string): string => {
@@ -25,7 +27,7 @@ const getPromptForMode = (mode: EditMode, customPrompt: string): string => {
     }
 }
 
-const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, editMode }) => {
+const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, editMode, onNavigateToSettings }) => {
     const [originalImage, setOriginalImage] = useState<{ file: File, preview: string } | null>(null);
     const [editedImage, setEditedImage] = useState<string | null>(null);
     const [customPrompt, setCustomPrompt] = useState('');
@@ -46,7 +48,7 @@ const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, 
             setError('الرجاء تحديد ملف صورة صالح.');
         }
     };
-
+    
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.currentTarget.classList.remove('border-teal-500');

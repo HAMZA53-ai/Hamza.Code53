@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
 import AudioWaveIcon from './icons/AudioWaveIcon';
-import { generateTextForTool } from '../services/geminiService';
+import { generateTextForTool } from '../services/aiService';
 import { marked } from 'marked';
 
 type AudioToolTab = 'music' | 'enhancer' | 'tts' | 'cloning' | 'stt';

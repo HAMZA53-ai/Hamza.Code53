@@ -1,17 +1,17 @@
+
 import React, { useState, useEffect } from 'react';
 import ChatWindow from './components/ChatWindow';
 import Header from './components/Header';
 import { useChat } from './hooks/useChat';
 import HistorySidebar from './components/HistorySidebar';
-// ADD: Import the new unified Tools component.
 import Tools from './components/Tools';
 import Blog from './components/Blog';
 import Creations from './components/Creations';
 import Settings from './components/Settings';
 import { View } from './types';
 import * as settingsService from './services/settingsService';
-
-// REMOVED: Individual tool component imports are no longer needed here.
+import WelcomeScreen from './components/WelcomeScreen';
+import * as userService from './services/userService';
 
 const App: React.FC = () => {
   const {
@@ -22,30 +22,32 @@ const App: React.FC = () => {
     startNewChat,
     loadChat,
     deleteChat,
+    chatMode,
+    setChatMode,
   } = useChat();
 
+  const [userName, setUserName] = useState<string | null>(() => userService.getUserName());
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [currentView, setCurrentView] = useState<View>('chat');
-  const [theme, setTheme] = useState<'light' | 'dark'>(settingsService.getTheme());
-  const [isDevMode, setDevMode] = useState<boolean>(settingsService.getDeveloperMode());
-
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    // Cyberpunk theme is always dark
+    document.documentElement.classList.add('dark');
+  }, []);
+  
+  const handleSetUserName = (name: string) => {
+    userService.saveUserName(name);
+    setUserName(name);
+    if (history.length === 0) {
+        startNewChat();
     }
-    settingsService.setTheme(theme);
-  }, [theme]);
-
-  const handleSetDevMode = (enabled: boolean) => {
-    setDevMode(enabled);
-    settingsService.setDeveloperMode(enabled);
   };
 
-
+  const handleUpdateUserName = (newName: string) => {
+    userService.saveUserName(newName);
+    setUserName(newName);
+  };
+  
   const handleNewChat = () => {
     startNewChat();
     setCurrentView('chat');
@@ -72,31 +74,32 @@ const App: React.FC = () => {
             conversation={currentChat}
             isLoading={isLoading}
             onSend={sendMessage}
-            isDevMode={isDevMode}
+            chatMode={chatMode}
+            setChatMode={setChatMode}
           />
         );
-      // ADD: A new case for the unified 'tools' view.
       case 'tools':
-        return <Tools />;
-      // REMOVED: Cases for individual tools like 'image', 'video', 'website', etc.
+        return <Tools onNavigateToSettings={() => setCurrentView('settings')}/>;
       case 'blog':
         return <Blog />;
       case 'creations':
         return <Creations />;
       case 'settings':
         return <Settings 
-                  currentTheme={theme} 
-                  onSetTheme={setTheme} 
-                  isDevMode={isDevMode}
-                  onSetDevMode={handleSetDevMode}
+                  currentUserName={userName!}
+                  onUpdateUserName={handleUpdateUserName}
                 />;
       default:
         return null;
     }
   }
+  
+  if (!userName) {
+    return <WelcomeScreen onSetName={handleSetUserName} />;
+  }
 
   return (
-    <div className="flex flex-row-reverse h-screen bg-white dark:bg-slate-900 text-slate-800 dark:text-white font-sans overflow-hidden transition-colors duration-300">
+    <div className="flex flex-row-reverse h-screen bg-transparent text-slate-200 font-sans overflow-hidden">
       <HistorySidebar
         history={history}
         currentChatId={currentChat?.id || null}

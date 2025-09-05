@@ -1,22 +1,20 @@
+
 import React, { useState } from 'react';
 import ToolsIcon from './icons/ToolsIcon';
 
 // Import tool components
 import ImageGenerator from './ImageGenerator';
-import VideoGenerator from './VideoGenerator';
 import WebsiteGenerator from './WebsiteGenerator';
 import StudyTools from './StudyTools';
 import TranslationSummarization from './TranslationSummarization';
 import GenericTextTool from './GenericTextTool';
 import ImageEditorTool from './ImageEditorTool';
 import LogoGenerator from './LogoGenerator';
-import VideoTools from './VideoTools';
 import AudioTools from './AudioTools';
 
 
 // Import icons for the dashboard
 import ImageIcon from './icons/ImageIcon';
-import VideoIcon from './icons/VideoIcon';
 import WebsiteIcon from './icons/WebsiteIcon';
 import EducationIcon from './icons/EducationIcon';
 import TranslateIcon from './icons/TranslateIcon';
@@ -27,7 +25,6 @@ import ArticleIcon from './icons/ArticleIcon';
 type ActiveTool = 
     | null
     | 'image-generator'
-    | 'video-generator'
     | 'website-generator'
     | 'study-tools'
     | 'translation-summarization'
@@ -41,8 +38,11 @@ type ActiveTool =
     | 'product-description-generator'
     | 'copywriting-tools'
     | 'script-writer'
-    | 'video-tools'
     | 'audio-tools';
+
+interface ToolsProps {
+    onNavigateToSettings: () => void;
+}
     
 // Configuration object for all tools
 const toolConfigs = {
@@ -53,9 +53,6 @@ const toolConfigs = {
     'image-upscaler': { component: ImageEditorTool, props: { title: 'تحسين جودة الصور', icon: <ImageIcon className="w-full h-full" />, editMode: 'upscale' } },
     'image-to-cartoon': { component: ImageEditorTool, props: { title: 'تحويل الصور لكرتون', icon: <ImageIcon className="w-full h-full" />, editMode: 'cartoonify' } },
     'background-remover': { component: ImageEditorTool, props: { title: 'إزالة الخلفيات', icon: <ImageIcon className="w-full h-full" />, editMode: 'background-remove' } },
-    // Video & Motion
-    'video-generator': { component: VideoGenerator, props: {} },
-    'video-tools': { component: VideoTools, props: {} },
     // Audio & Music
     'audio-tools': { component: AudioTools, props: {} },
     // Content & Writing
@@ -80,11 +77,11 @@ interface ToolCardProps {
 const ToolCard: React.FC<ToolCardProps> = ({ icon, title, description, onClick }) => (
     <div
         onClick={onClick}
-        className={`bg-slate-100 dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 transition-all duration-300 flex flex-col items-center text-center relative cursor-pointer hover:shadow-2xl hover:shadow-cyan-500/30 dark:hover:shadow-cyan-400/30 hover:border-cyan-500 dark:hover:border-cyan-400 hover:-translate-y-2`}
+        className={`bg-[var(--panel-dark)] backdrop-blur-sm rounded-lg p-4 border border-[var(--border-color)] transition-all duration-300 flex flex-col items-center text-center relative cursor-pointer hover:border-[var(--neon-cyan)] hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] hover:-translate-y-2`}
     >
-        <div className="w-10 h-10 mb-3 text-cyan-600 dark:text-cyan-400">{icon}</div>
-        <h3 className="text-base font-bold text-slate-800 dark:text-slate-200 mb-2">{title}</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400 flex-1">{description}</p>
+        <div className="w-10 h-10 mb-3 text-[var(--neon-cyan)] [filter:drop-shadow(0_0_3px_var(--neon-cyan))]">{icon}</div>
+        <h3 className="text-base font-bold text-slate-200 mb-2">{title}</h3>
+        <p className="text-sm text-slate-400 flex-1">{description}</p>
     </div>
 );
 
@@ -95,14 +92,14 @@ interface ToolCategoryProps {
 
 const ToolCategory: React.FC<ToolCategoryProps> = ({ title, children }) => (
     <div className="mb-12">
-        <h3 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-6 text-center">{title}</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <h3 className="text-2xl font-bold text-slate-200 mb-6 text-center tracking-widest">{title}</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {children}
         </div>
     </div>
 );
 
-const Tools: React.FC = () => {
+const Tools: React.FC<ToolsProps> = ({ onNavigateToSettings }) => {
     const [activeTool, setActiveTool] = useState<ActiveTool>(null);
     
     const handleBack = () => setActiveTool(null);
@@ -110,26 +107,25 @@ const Tools: React.FC = () => {
     if (activeTool) {
         const config = toolConfigs[activeTool];
         if (config) {
-            // FIX: Cast component to React.FC<any> to resolve TypeScript error with props union type.
             const ToolComponent = config.component as React.FC<any>;
-            return <ToolComponent {...config.props} onBack={handleBack} />;
+            return <ToolComponent {...config.props} onBack={handleBack} onNavigateToSettings={onNavigateToSettings} />;
         }
     }
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <div className="p-4 md:p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
+            <div className="p-4 md:p-6 bg-[var(--panel-dark)] backdrop-blur-sm border-b border-[var(--border-color)]">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-2xl font-bold text-cyan-600 dark:text-cyan-300 mb-2 text-center flex items-center justify-center gap-3">
+                    <h2 className="text-2xl font-bold text-[var(--neon-cyan)] [text-shadow:var(--glow-cyan)] mb-2 text-center flex items-center justify-center gap-3">
                         <ToolsIcon className="w-8 h-8" />
                         مركز الأدوات
                     </h2>
-                    <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-center text-sm text-slate-400">
                         استكشف مجموعة أدوات الذكاء الاصطناعي لإطلاق العنان لإبداعك وإنتاجيتك.
                     </p>
                 </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 md:p-8">
+            <div className="flex-1 overflow-y-auto p-4 md:p-8 cyber-scrollbar">
                 <div className="max-w-7xl mx-auto">
                     
                     <ToolCategory title="🎨 التصميم والإبداع">
@@ -139,11 +135,6 @@ const Tools: React.FC = () => {
                         <ToolCard icon={<ImageIcon className="w-full h-full" />} title="تحسين جودة الصور" description="ارفع دقة صورك القديمة أو منخفضة الجودة بلمسة زر." onClick={() => setActiveTool('image-upscaler')} />
                         <ToolCard icon={<ImageIcon className="w-full h-full" />} title="تحويل الصور لكرتون" description="أضف لمسة فنية على صورك بتحويلها إلى رسومات أو أنمي." onClick={() => setActiveTool('image-to-cartoon')} />
                         <ToolCard icon={<ImageIcon className="w-full h-full" />} title="إزالة الخلفيات" description="أزل خلفيات الصور بسهولة ودقة عالية." onClick={() => setActiveTool('background-remover')} />
-                    </ToolCategory>
-
-                    <ToolCategory title="🎬 الفيديو والموشن">
-                        <ToolCard icon={<VideoIcon className="w-full h-full" />} title="توليد فيديو من نص" description="حوّل أفكارك وسيناريوهاتك إلى مقاطع فيديو قصيرة وجذابة." onClick={() => setActiveTool('video-generator')} />
-                        <ToolCard icon={<VideoIcon className="w-full h-full" />} title="مجموعة أدوات الفيديو" description="حسّن جودة الفيديو، أضف ترجمات، وأنشئ رسومًا متحركة بسيطة." onClick={() => setActiveTool('video-tools')} />
                     </ToolCategory>
 
                     <ToolCategory title="✍️ المحتوى والكتابة">

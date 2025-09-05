@@ -1,3 +1,4 @@
+
 const THEME_KEY = 'hamzaSuperPlusTheme';
 const DEV_MODE_KEY = 'hamzaSuperPlusDevMode';
 type Theme = 'light' | 'dark';

@@ -1,11 +1,16 @@
+
 import React, { useState } from 'react';
-import { generateLogo } from '../services/geminiService';
+import { generateLogo } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
 import SparkleIcon from './icons/SparkleIcon';
 
-const LogoGenerator: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+interface LogoGeneratorProps {
+    onBack: () => void;
+}
+
+const LogoGenerator: React.FC<LogoGeneratorProps> = ({ onBack }) => {
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState('minimalist');
   const [isLoading, setIsLoading] = useState(false);

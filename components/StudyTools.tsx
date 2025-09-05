@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Spinner from './Spinner';
 import EducationIcon from './icons/EducationIcon';
-import * as geminiService from '../services/geminiService';
+import * as aiService from '../services/aiService';
 import { QuizQuestion, QuizType } from '../types';
 import GenericTextTool from './GenericTextTool';
 import SlidesGenerator from './SlidesGenerator';
@@ -38,7 +38,7 @@ const ConceptExplainerTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setExplanation('');
 
         try {
-            const result = await geminiService.explainConcept(topic);
+            const result = await aiService.explainConcept(topic);
             setExplanation(result);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع.';
@@ -121,7 +121,7 @@ const QuizGeneratorTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         setShowAnswers(false);
 
         try {
-            const result = await geminiService.generateQuiz(text, quizType, questionCount);
+            const result = await aiService.generateQuiz(text, quizType, questionCount);
             setQuiz(result);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع.';

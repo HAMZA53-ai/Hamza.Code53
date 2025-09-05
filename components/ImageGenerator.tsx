@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { generateImages } from '../services/geminiService';
+import { generateImages } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import DownloadIcon from './icons/DownloadIcon';

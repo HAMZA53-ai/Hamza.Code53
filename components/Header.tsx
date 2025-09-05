@@ -7,11 +7,11 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   return (
-    <header className="bg-white/80 dark:bg-slate-800/50 backdrop-blur-sm p-4 border-b border-gray-200 dark:border-slate-700 shadow-sm flex items-center justify-between z-10 flex-shrink-0 transition-colors duration-300">
+    <header className="bg-[var(--panel-dark)] backdrop-blur-sm p-2 sm:p-4 border-b border-[var(--border-color)] flex items-center justify-between z-10 flex-shrink-0">
       <div className="flex-1"></div>
-      <h1 className="text-xl font-bold text-center text-teal-600 dark:text-teal-300">حمزة سوبر بلس</h1>
+      <h1 className="text-xl sm:text-2xl font-bold text-center text-[var(--neon-cyan)] [text-shadow:var(--glow-cyan)]">MZ</h1>
       <div className="flex-1 flex justify-end">
-        <button onClick={onToggleSidebar} className="p-2 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Toggle sidebar">
+        <button onClick={onToggleSidebar} className="p-2 text-slate-300 hover:text-[var(--neon-cyan)] transition-colors" aria-label="Toggle sidebar">
             <SidebarIcon className="w-6 h-6" />
         </button>
       </div>

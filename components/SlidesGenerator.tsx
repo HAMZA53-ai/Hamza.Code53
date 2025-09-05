@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
 import SlidesIcon from './icons/SlidesIcon';
-import { generateSlides } from '../services/geminiService';
+import { generateSlides } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import { Slide } from '../types';
 import { exportSlidesToPDF } from '../utils/pdfExporter';

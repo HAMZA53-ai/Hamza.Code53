@@ -1,13 +1,21 @@
+
 import React, { useState, useRef, ChangeEvent, KeyboardEvent } from 'react';
 import PaperclipIcon from './icons/PaperclipIcon';
 import SendIcon from './icons/SendIcon';
+import { ChatMode } from '../types';
+import SearchIcon from './icons/SearchIcon';
+import BrainIcon from './icons/BrainIcon';
+import ZapIcon from './icons/ZapIcon';
+import BookOpenIcon from './icons/BookOpenIcon';
 
 interface ChatInputProps {
   onSend: (text: string, image?: { data: string; mimeType: string }) => void;
   disabled: boolean;
+  chatMode: ChatMode;
+  setChatMode: (mode: ChatMode) => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setChatMode }) => {
   const [text, setText] = useState('');
   const [image, setImage] = useState<{ file: File; preview: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -50,29 +58,56 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
     e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
+  const ModeButton: React.FC<{
+    mode: ChatMode;
+    label: string;
+    children: React.ReactNode;
+  }> = ({ mode, label, children }) => (
+    <button
+      type="button"
+      onClick={() => setChatMode(mode)}
+      disabled={disabled}
+      className={`flex-1 flex flex-col items-center justify-center p-1 rounded-lg transition-all text-xs duration-200 ${
+        chatMode === mode 
+          ? 'bg-[var(--neon-cyan)] text-black shadow-[var(--glow-cyan-light)] font-bold' 
+          : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-200'
+      }`}
+      title={label}
+    >
+      {children}
+      <span className="mt-0.5">{label}</span>
+    </button>
+  );
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       {image && (
-        <div className="mb-2 p-2 bg-slate-200 dark:bg-slate-700/50 rounded-lg flex items-center justify-between">
+        <div className="mb-2 p-2 bg-[var(--panel-dark)] border border-[var(--border-color)] rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={image.preview} alt="Preview" className="w-16 h-16 object-cover rounded-md" />
-            <span className="text-sm text-slate-600 dark:text-slate-300">{image.file.name}</span>
+            <img src={image.preview} alt="Preview" className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-md" />
+            <span className="text-sm text-slate-300 truncate">{image.file.name}</span>
           </div>
           <button
             onClick={() => setImage(null)}
-            className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-1 rounded-full bg-slate-300 dark:bg-slate-800 hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors"
+            className="text-slate-400 hover:text-white p-1 rounded-full bg-slate-800 hover:bg-slate-600 transition-colors flex-shrink-0"
           >
             &#x2715;
           </button>
         </div>
       )}
-      <div className="flex items-end gap-2 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-2xl p-2">
+      <div className="grid grid-cols-4 gap-2 mb-2">
+        <ModeButton mode="google_search" label="بحث جوجل"><SearchIcon className="w-5 h-5" /></ModeButton>
+        <ModeButton mode="default" label="تفكير افتراضي"><BrainIcon className="w-5 h-5" /></ModeButton>
+        <ModeButton mode="quick_response" label="رد سريع"><ZapIcon className="w-5 h-5" /></ModeButton>
+        <ModeButton mode="learning" label="ذاكرة وتعلم"><BookOpenIcon className="w-5 h-5" /></ModeButton>
+      </div>
+      <div className="flex items-end gap-2 bg-[var(--panel-dark)] border border-[var(--border-color)] rounded-xl p-1 sm:p-2">
         <textarea
           value={text}
           onChange={handleTextChange}
           onKeyPress={handleKeyPress}
           placeholder="اكتب رسالتك هنا..."
-          className="flex-1 bg-transparent text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 resize-none outline-none p-2 max-h-40"
+          className="flex-1 bg-transparent text-slate-200 placeholder-slate-500 resize-none outline-none p-2 max-h-24 sm:max-h-40 cyber-scrollbar"
           rows={1}
           disabled={disabled}
         />
@@ -86,18 +121,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled }) => {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
-          className="p-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-300 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 sm:p-2 text-slate-400 hover:text-[var(--neon-cyan)] disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
           aria-label="Attach image"
         >
-          <PaperclipIcon className="w-6 h-6" />
+          <PaperclipIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
         <button
           onClick={handleSend}
           disabled={disabled || (!text.trim() && !image)}
-          className="p-3 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors"
+          className="p-2 sm:p-3 bg-[var(--neon-cyan)] text-black rounded-lg hover:shadow-[var(--glow-cyan)] disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300"
           aria-label="Send message"
         >
-          <SendIcon className="w-6 h-6" />
+          <SendIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       </div>
     </div>

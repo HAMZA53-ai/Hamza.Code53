@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { generateVideo, getVideoOperationStatus, getApiKey as getGeminiApiKey } from '../services/geminiService';
+import { generateVideo, getVideoOperationStatus } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import VideoIcon from './icons/VideoIcon';
-import ExternalLinkIcon from './icons/ExternalLinkIcon';
 import BackIcon from './icons/BackIcon';
 
 const loadingMessages = [
@@ -61,12 +61,20 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
                     const downloadLink = updatedOperation.response?.generatedVideos?.[0]?.video?.uri;
                     if (downloadLink && creationIdRef.current) {
                         try {
-                            const apiKey = getGeminiApiKey(); // This now correctly gets the user's key if set
-                            const finalUrl = `${downloadLink}&key=${apiKey}`;
-                            setVideoUrl(finalUrl);
-                             creationsService.updateCreation(creationIdRef.current, { status: 'completed', data: finalUrl });
+                             const apiKey = process.env.API_KEY;
+                             if (!apiKey) throw new Error("مفتاح API غير مكون.");
+                             
+                             const response = await fetch(`${downloadLink}&key=${apiKey}`);
+                             if (!response.ok) {
+                                 throw new Error(`فشل تحميل الفيديو: ${response.statusText}`);
+                             }
+                             const videoBlob = await response.blob();
+                             const objectUrl = URL.createObjectURL(videoBlob);
+
+                             setVideoUrl(objectUrl);
+                             creationsService.updateCreation(creationIdRef.current, { status: 'completed', data: objectUrl });
                         } catch (e) {
-                             const err = e instanceof Error ? e.message : "API Key not configured."
+                             const err = e instanceof Error ? e.message : "فشل في جلب الفيديو."
                              setError(err);
                              if(creationIdRef.current) creationsService.updateCreation(creationIdRef.current, { status: 'failed', error: err });
                              setIsLoading(false);
@@ -169,15 +177,6 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
                                 className="flex-1 h-10 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 transition-colors font-semibold flex items-center justify-center"
                             >
                                 تحميل الفيديو
-                            </a>
-                            <a
-                                href={videoUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="sm:w-auto h-10 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors font-semibold flex items-center justify-center gap-2"
-                            >
-                                <ExternalLinkIcon className="w-5 h-5" />
-                                معاينة خارجية
                             </a>
                         </div>
                     </div>

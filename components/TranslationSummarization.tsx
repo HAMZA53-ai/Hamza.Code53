@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Spinner from './Spinner';
 import TranslateIcon from './icons/TranslateIcon';
-import * as geminiService from '../services/geminiService';
+import * as aiService from '../services/aiService';
 import CopyIcon from './icons/CopyIcon';
 import BackIcon from './icons/BackIcon';
 
@@ -35,9 +35,9 @@ const TranslationSummarization: React.FC<TranslationSummarizationProps> = ({ onB
         try {
             let result = '';
             if (activeTab === 'translate') {
-                result = await geminiService.translateText(inputText, targetLanguage);
+                result = await aiService.translateText(inputText, targetLanguage);
             } else {
-                result = await geminiService.summarizeText(inputText);
+                result = await aiService.summarizeText(inputText);
             }
             setOutputText(result);
         } catch (err) {

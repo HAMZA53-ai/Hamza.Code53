@@ -1,30 +1,29 @@
+
 import React from 'react';
 import { ChatMessage, ChatRole } from '../types';
-import HamzaIcon from './icons/HamzaIcon';
+import HexagonIcon from './icons/HexagonIcon';
 
 interface MessageProps {
   message: ChatMessage;
-  isDevMode: boolean;
 }
 
-const Message: React.FC<MessageProps> = ({ message, isDevMode }) => {
+const Message: React.FC<MessageProps> = ({ message }) => {
   const isModel = message.role === ChatRole.Model;
   const isError = message.role === ChatRole.Error;
 
   const containerClasses = isModel || isError ? 'justify-start' : 'justify-end';
   const bubbleClasses = isModel
-    ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white'
+    ? 'bg-[var(--panel-dark)] border border-[var(--border-color)] text-slate-200'
     : isError
-    ? 'bg-red-100 dark:bg-red-800/50 border border-red-300 dark:border-red-600 text-red-800 dark:text-red-200'
-    : 'bg-teal-600 text-white';
+    ? 'bg-red-900/50 border border-red-500/50 text-red-200'
+    : 'bg-cyan-600/80 border border-cyan-500/50 text-white';
 
   const renderTextWithLinks = (text: string) => {
-    // Basic markdown link regex: [text](url)
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
     const parts = text.split(linkRegex);
     
     return parts.map((part, index) => {
-      if (index % 3 === 1) { // This is the link text
+      if (index % 3 === 1) {
         const linkUrl = parts[index + 1];
         return (
           <a 
@@ -32,29 +31,29 @@ const Message: React.FC<MessageProps> = ({ message, isDevMode }) => {
             href={linkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-teal-600 dark:text-teal-400 font-semibold underline hover:opacity-80"
+            className="text-[var(--neon-cyan)] font-semibold underline hover:opacity-80"
           >
             {part}
           </a>
         );
       }
-      if (index % 3 === 2) { // This is the URL part, ignore it
+      if (index % 3 === 2) {
         return null;
       }
-      return part; // This is a regular text part
+      return part;
     }).filter(Boolean);
   };
 
   return (
-    <div className={`flex items-end gap-3 ${containerClasses}`}>
-      {(isModel || isError) && <HamzaIcon className="w-8 h-8 flex-shrink-0 text-teal-500 dark:text-teal-400" />}
+    <div className={`flex items-end gap-2 sm:gap-3 ${containerClasses}`}>
+      {(isModel || isError) && <HexagonIcon className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 text-[var(--neon-cyan)]" />}
       
       <div className="flex flex-col">
-        <div className={`max-w-xl lg:max-w-3xl p-4 rounded-2xl ${bubbleClasses}`}>
+        <div className={`max-w-xl lg:max-w-3xl p-3 sm:p-4 rounded-lg ${bubbleClasses}`}>
           {message.parts.map((part, index) => {
             if (part.type === 'text') {
               return (
-                <div key={index} className="whitespace-pre-wrap">
+                <div key={index} className="whitespace-pre-wrap prose prose-invert prose-p:text-slate-200 prose-p:my-2">
                   {renderTextWithLinks(part.text)}
                 </div>
               );
@@ -72,20 +71,6 @@ const Message: React.FC<MessageProps> = ({ message, isDevMode }) => {
             return null;
           })}
         </div>
-        
-        {isDevMode && isModel && message.debugInfo && (
-          <div className="mt-2 text-xs text-slate-400 dark:text-slate-500 px-2">
-            <span>النموذج: {message.debugInfo.model}</span>
-            <span className="mx-2">|</span>
-            <span>الاستجابة: {message.debugInfo.responseTimeMs} مللي ثانية</span>
-            {message.debugInfo.totalTokens !== undefined && (
-              <>
-                <span className="mx-2">|</span>
-                <span>التوكنز: {message.debugInfo.totalTokens}</span>
-              </>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

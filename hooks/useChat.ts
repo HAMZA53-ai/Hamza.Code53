@@ -1,29 +1,30 @@
+
 import { useState, useCallback, useEffect } from 'react';
-import { ChatMessage, ChatRole, MessagePart, Conversation } from '../types';
-import { runQuery, generateImages, generateWebsite } from '../services/geminiService';
+import { ChatMessage, ChatRole, MessagePart, Conversation, ChatMode } from '../types';
+import { runQuery } from '../services/aiService';
 import * as historyService from '../services/historyService';
-
-// Regex to detect commands
-const imageCommandRegex = /^(?:انشئ|صمم|ارسم|ولّد)\s+صورة\s*لـ?:?\s*(.+)/i;
-const websiteCommandRegex = /^(?:انشئ|صمم|ابنِ)\s+موقع\s*(?:ويب)?\s*عن:?\s*(.+)/i;
-
+import * as userService from '../services/userService';
 
 export const useChat = () => {
   const [history, setHistory] = useState<Conversation[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [chatMode, setChatMode] = useState<ChatMode>('default');
 
   useEffect(() => {
     const loadedHistory = historyService.getHistory();
     setHistory(loadedHistory);
     if (loadedHistory.length > 0) {
       setCurrentChatId(loadedHistory[0].id);
-    } else {
-      startNewChat(true); 
     }
   }, []);
 
-  const startNewChat = useCallback((isInitial = false) => {
+  const startNewChat = useCallback(() => {
+    const userName = userService.getUserName();
+    const welcomeMessage = userName
+      ? `أهلاً بك يا ${userName}! أنا MZ. يركز هذا التطبيق الآن على الميزات الأساسية المدعومة لتقديم أفضل تجربة. كيف يمكنني مساعدتك اليوم؟`
+      : 'أهلاً بك! أنا MZ. كيف يمكنني مساعدتك اليوم؟';
+
     const newChat: Conversation = {
       id: `chat-${Date.now()}`,
       title: 'محادثة جديدة',
@@ -32,7 +33,7 @@ export const useChat = () => {
         {
           id: 'init',
           role: ChatRole.Model,
-          parts: [{ type: 'text', text: 'أهلاً بك! أنا حمزة سوبر بلس. يمكنك الدردشة معي أو أن تطلب مني إنشاء صورة أو موقع ويب. جرب أن تكتب "انشئ صورة لقطة في الفضاء".' }],
+          parts: [{ type: 'text', text: welcomeMessage }],
         },
       ],
     };
@@ -58,7 +59,7 @@ export const useChat = () => {
         if (updatedHistory.length > 0) {
           setCurrentChatId(updatedHistory[0].id);
         } else {
-          startNewChat(true);
+          startNewChat();
         }
       }
       return updatedHistory;
@@ -71,7 +72,6 @@ export const useChat = () => {
         const chatToUpdate = historyCopy.find(c => c.id === currentChatId);
         if (chatToUpdate) {
             chatToUpdate.messages = [...chatToUpdate.messages, message];
-            historyService.saveHistory(historyCopy);
         }
         return historyCopy;
       });
@@ -93,7 +93,6 @@ export const useChat = () => {
       parts: userMessageParts,
     };
     
-    // Update state with user message
     const currentChatIndex = history.findIndex(c => c.id === currentChatId);
     if (currentChatIndex === -1) {
         setIsLoading(false);
@@ -104,7 +103,7 @@ export const useChat = () => {
     const currentChat = { ...updatedHistory[currentChatIndex] };
     currentChat.messages = [...currentChat.messages, newUserMessage];
     
-    if (currentChat.messages.length === 2) {
+    if (currentChat.messages.length === 2 && currentChat.messages[0].id === 'init') {
         currentChat.title = text.substring(0, 40) + (text.length > 40 ? '...' : '');
     }
     
@@ -115,43 +114,24 @@ export const useChat = () => {
     setHistory(updatedHistory);
     setCurrentChatId(currentChat.id);
 
-    // --- Command Detection ---
-    const imageMatch = text.match(imageCommandRegex);
-    const websiteMatch = text.match(websiteCommandRegex);
-
     try {
-        if (imageMatch && !image) { // Don't trigger if user is asking about an uploaded image
-            const prompt = imageMatch[1];
-            const thinkingMessage: ChatMessage = { id: `model-thinking-${Date.now()}`, role: ChatRole.Model, parts: [{ type: 'text', text: `بالتأكيد! جارٍ إنشاء صورة لـ: ${prompt}...` }]};
-            addMessageToCurrentChat(thinkingMessage);
-
-            const images = await generateImages(prompt, 1, '1:1');
-            const imagePart: MessagePart = { type: 'image', data: images[0].split(',')[1], mimeType: 'image/jpeg' };
-            const modelMessage: ChatMessage = { id: `model-${Date.now()}`, role: ChatRole.Model, parts: [{type: 'text', text: 'تفضل، هذه هي الصورة التي طلبتها.'}, imagePart] };
-            addMessageToCurrentChat(modelMessage);
-
-        } else if (websiteMatch) {
-            const prompt = websiteMatch[1];
-            const thinkingMessage: ChatMessage = { id: `model-thinking-${Date.now()}`, role: ChatRole.Model, parts: [{ type: 'text', text: `فكرة رائعة! جارٍ تصميم موقع ويب عن: ${prompt}...` }]};
-            addMessageToCurrentChat(thinkingMessage);
-            
-            // FIX: Added the missing 'language' argument to the generateWebsite call.
-            const code = await generateWebsite(prompt, 'tailwind', 'Arabic');
-            const blob = new Blob([code], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const modelMessage: ChatMessage = { id: `model-${Date.now()}`, role: ChatRole.Model, parts: [{ type: 'text', text: `لقد انتهيت من بناء الموقع! يمكنك معاينته من خلال الرابط التالي:\n\n[افتح معاينة الموقع](${url})` }]};
-            addMessageToCurrentChat(modelMessage);
-
-        } else {
-            // Default chat behavior
-            const response = await runQuery(currentChat.messages);
-            const modelMessage: ChatMessage = { id: `model-${Date.now()}`, role: ChatRole.Model, parts: [{ type: 'text', text: response.text }], debugInfo: response.debugInfo };
-            addMessageToCurrentChat(modelMessage);
-        }
+        const response = await runQuery(currentChat.messages, chatMode);
+        const modelMessage: ChatMessage = { 
+            id: `model-${Date.now()}`, 
+            role: ChatRole.Model, 
+            parts: [{ type: 'text', text: response.text }], 
+            debugInfo: response.debugInfo,
+            groundingSources: response.sources
+        };
+        addMessageToCurrentChat(modelMessage);
 
     } catch (e) {
       const err = e instanceof Error ? e.message : 'An unknown error occurred.';
-      const errorMessage: ChatMessage = { id: `error-${Date.now()}`, role: ChatRole.Error, parts: [{ type: 'text', text: `عذراً، حدث خطأ: ${err}` }] };
+      const errorMessage: ChatMessage = { 
+          id: `error-${Date.now()}`, 
+          role: ChatRole.Error, 
+          parts: [{ type: 'text', text: `عذراً، حدث خطأ: ${err}` }] 
+      };
       addMessageToCurrentChat(errorMessage);
     } finally {
       setIsLoading(false);
@@ -160,9 +140,19 @@ export const useChat = () => {
         return prevHistory;
        });
     }
-  }, [currentChatId, history]);
+  }, [currentChatId, history, chatMode]);
 
   const currentChat = history.find(c => c.id === currentChatId);
 
-  return { history, currentChat, isLoading, sendMessage, startNewChat, loadChat, deleteChat };
+  return { 
+    history, 
+    currentChat, 
+    isLoading, 
+    sendMessage, 
+    startNewChat, 
+    loadChat, 
+    deleteChat,
+    chatMode,
+    setChatMode
+  };
 };

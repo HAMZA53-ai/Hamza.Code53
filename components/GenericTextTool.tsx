@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
-import { generateTextForTool } from '../services/geminiService';
+import { generateTextForTool } from '../services/aiService';
 
 interface GenericTextToolProps {
   title: string;

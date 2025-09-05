@@ -6,7 +6,6 @@ import { exportSlidesToPDF } from '../utils/pdfExporter';
 import { exportToCodePen } from '../utils/codepenExporter';
 
 import ImageIcon from './icons/ImageIcon';
-import VideoIcon from './icons/VideoIcon';
 import WebsiteIcon from './icons/WebsiteIcon';
 import SparkleIcon from './icons/SparkleIcon';
 import SlidesIcon from './icons/SlidesIcon';
@@ -47,15 +46,13 @@ const Creations: React.FC = () => {
     switch (type) {
       case 'Image':
       case 'EditedImage':
-        return <ImageIcon className="w-6 h-6 text-purple-500 dark:text-purple-400" />;
+        return <ImageIcon className="w-6 h-6 text-purple-400" />;
       case 'Logo':
-        return <SparkleIcon className="w-6 h-6 text-amber-500 dark:text-amber-400" />;
-      case 'Video': 
-        return <VideoIcon className="w-6 h-6 text-blue-500 dark:text-blue-400" />;
+        return <SparkleIcon className="w-6 h-6 text-amber-400" />;
       case 'Website': 
-        return <WebsiteIcon className="w-6 h-6 text-green-500 dark:text-green-400" />;
+        return <WebsiteIcon className="w-6 h-6 text-green-400" />;
       case 'Slides': 
-        return <SlidesIcon className="w-6 h-6 text-orange-500 dark:text-orange-400" />;
+        return <SlidesIcon className="w-6 h-6 text-orange-400" />;
       default: 
         return null;
     }
@@ -63,11 +60,11 @@ const Creations: React.FC = () => {
   
   const renderCreationContent = (creation: Creation) => {
     if (creation.status === 'failed') {
-      return <p className="text-red-600 dark:text-red-400 text-sm mt-2">فشل: {creation.error}</p>;
+      return <p className="text-red-400 text-sm mt-2">فشل: {creation.error}</p>;
     }
     if (creation.status === 'pending') {
       return (
-        <div className="flex items-center gap-2 mt-2 text-blue-500 dark:text-blue-400">
+        <div className="flex items-center gap-2 mt-2 text-blue-400">
             <div className="w-3 h-3 border-2 border-dashed rounded-full animate-spin border-current"></div>
             <span className='text-sm'>قيد التنفيذ...</span>
         </div>
@@ -101,19 +98,9 @@ const Creations: React.FC = () => {
              return (
                 <div className="mt-2 flex items-center gap-4">
                     <img src={creation.data} className="rounded-md w-32 h-32 object-cover cursor-pointer" onClick={() => setSelectedImage(creation.data)} />
-                     <button onClick={() => handleDownload(creation.data, `${creation.prompt.substring(0, 15)}.png`)} className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-500 transition-colors">
+                     <button onClick={() => handleDownload(creation.data, `${creation.prompt.substring(0, 15)}.png`)} className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white text-sm rounded-lg hover:bg-cyan-500 transition-colors">
                         <DownloadIcon className="w-4 h-4" />
                         تحميل الصورة
-                    </button>
-                </div>
-            );
-        case 'Video':
-            return (
-                <div className="mt-2 space-y-2">
-                    <video controls src={creation.data} className="rounded-md w-full max-w-md" />
-                    <button onClick={() => handleDownload(creation.data, `${creation.prompt.substring(0, 15)}.mp4`)} className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-500 transition-colors">
-                        <DownloadIcon className="w-4 h-4" />
-                        تحميل الفيديو
                     </button>
                 </div>
             );
@@ -135,7 +122,7 @@ const Creations: React.FC = () => {
                         <ShareIcon className="w-5 h-5" />
                         مشاركة على CodePen
                     </button>
-                    <button onClick={() => handleDownloadCode(creation.data, `website_${creation.id}.${fileExtension}`)} className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors text-sm">
+                    <button onClick={() => handleDownloadCode(creation.data, `website_${creation.id}.${fileExtension}`)} className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors text-sm">
                         <DownloadIcon className="w-5 h-5" />
                         تحميل الملف
                     </button>
@@ -144,7 +131,7 @@ const Creations: React.FC = () => {
         case 'Slides':
             return (
                 <div className="mt-2">
-                    <button onClick={() => exportSlidesToPDF(creation.data as Slide[], creation.prompt)} className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors">
+                    <button onClick={() => exportSlidesToPDF(creation.data as Slide[], creation.prompt)} className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-500 transition-colors">
                         <DownloadIcon className="w-5 h-5" />
                         تنزيل كـ PDF
                     </button>
@@ -161,7 +148,7 @@ const Creations: React.FC = () => {
      <button
         onClick={() => setFilter(type)}
         className={`px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-          filter === type ? 'border-b-2 border-indigo-500 dark:border-indigo-400 text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          filter === type ? 'border-b-2 border-indigo-400 text-white' : 'text-slate-400 hover:text-white'
         }`}
       >
         {label} ({count})
@@ -172,19 +159,18 @@ const Creations: React.FC = () => {
     <>
     {selectedImage && <ImageModal imageUrl={selectedImage} onClose={() => setSelectedImage(null)} />}
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="p-4 md:p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
-        <h2 className="text-xl font-bold text-indigo-600 dark:text-indigo-300 text-center">المنشآت</h2>
-        <div className="mt-4 flex justify-center border-b border-slate-300 dark:border-slate-700 overflow-x-auto">
+      <div className="p-4 md:p-6 bg-[var(--panel-dark)] backdrop-blur-sm border-b border-[var(--border-color)]">
+        <h2 className="text-xl font-bold text-indigo-300 text-center">المنشآت</h2>
+        <div className="mt-4 flex justify-center border-b border-[var(--border-color)] overflow-x-auto">
           <TabButton type="All" label="الكل" count={creations.length} />
           <TabButton type="Image" label="صور" count={creations.filter(c => c.type === 'Image').length} />
           <TabButton type="Logo" label="شعارات" count={creations.filter(c => c.type === 'Logo').length} />
           <TabButton type="EditedImage" label="صور معدلة" count={creations.filter(c => c.type === 'EditedImage').length} />
-          <TabButton type="Video" label="فيديو" count={creations.filter(c => c.type === 'Video').length} />
           <TabButton type="Website" label="مواقع" count={creations.filter(c => c.type === 'Website').length} />
           <TabButton type="Slides" label="عروض" count={creations.filter(c => c.type === 'Slides').length} />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 cyber-scrollbar">
         <div className="max-w-4xl mx-auto space-y-4">
             {filteredCreations.length === 0 ? (
                 <div className="text-center text-slate-500 pt-16">
@@ -192,17 +178,17 @@ const Creations: React.FC = () => {
                 </div>
             ) : (
                 filteredCreations.map(creation => (
-                    <div key={creation.id} className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div key={creation.id} className="bg-[var(--panel-dark)] p-4 rounded-lg border border-[var(--border-color)]">
                         <div className="flex justify-between items-start">
                            <div className="flex items-center gap-3">
                                 <CreationIcon type={creation.type} />
                                 <div>
-                                    <h3 className="font-semibold">{creation.type}</h3>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate max-w-xs md:max-w-md" title={creation.prompt}>{creation.prompt}</p>
+                                    <h3 className="font-semibold text-slate-200">{creation.type}</h3>
+                                    <p className="text-sm text-slate-400 truncate max-w-xs md:max-w-md" title={creation.prompt}>{creation.prompt}</p>
                                 </div>
                            </div>
                             <div className="text-right flex-shrink-0">
-                                <p className="text-xs text-slate-400 dark:text-slate-500">{formatTimestamp(creation.timestamp)}</p>
+                                <p className="text-xs text-slate-500">{formatTimestamp(creation.timestamp)}</p>
                             </div>
                         </div>
                         {renderCreationContent(creation)}

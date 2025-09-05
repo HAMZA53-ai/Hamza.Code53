@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateWebsite } from '../services/geminiService';
+import { generateWebsite } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import { WebTechStack } from '../types';
 import { exportToCodePen } from '../utils/codepenExporter';

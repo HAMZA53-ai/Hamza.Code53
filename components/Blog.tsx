@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import ArticleIcon from './icons/ArticleIcon';
 import BackIcon from './icons/BackIcon';
@@ -5,12 +6,36 @@ import BackIcon from './icons/BackIcon';
 interface Article {
     id: string;
     title: string;
-    category: 'شرح أداة' | 'مقارنة';
+    category: 'شرح أداة' | 'عن التطبيق';
     summary: string;
     content: React.ReactNode;
 }
 
 const articles: Article[] = [
+    {
+        id: 'about-us',
+        title: 'من نحن؟ قصة MZ',
+        category: 'عن التطبيق',
+        summary: 'اكتشف القصة وراء MZ، المساعد الذكي الذي يجمع بين الإبداع والإنتاجية. تعرف على رؤيتنا وكيف نسعى لجعل تقنية الذكاء الاصطناعي في متناول يديك.',
+        content: (
+            <div className="space-y-4">
+                <p>أهلاً بك في عالم MZ! نحن سعداء جدًا بوجودك هنا.</p>
+                <h3 className="text-lg font-semibold pt-2">ما هو MZ؟</h3>
+                <p>MZ ليس مجرد تطبيق دردشة آخر، بل هو مساعدك الشخصي الفائق، وشريكك الإبداعي، وأداتك الإنتاجية المتكاملة. وُلد هذا المشروع من شغف عميق بالتكنولوجيا ورغبة في جعل قوة الذكاء الاصطناعي المتقدمة، وتحديداً واجهة برمجة تطبيقات Gemini من Google، سهلة الوصول ومفيدة للجميع.</p>
+                <h3 className="text-lg font-semibold pt-2">رؤيتنا</h3>
+                <p>نؤمن بأن الذكاء الاصطناعي يجب أن يكون أداة تمكينية للجميع، وليس حكراً على الخبراء التقنيين. هدفنا هو كسر الحواجز وتوفير منصة بديهية يمكنك من خلالها:</p>
+                <ul className="list-disc list-inside space-y-2 pl-4">
+                    <li><strong>إطلاق العنان لإبداعك:</strong> من تحويل فكرة إلى صورة فنية، أو تصميم شعار لعلامتك التجارية، أو حتى بناء موقع ويب كامل في دقائق.</li>
+                    <li><strong>تعزيز إنتاجيتك:</strong> سواء كنت بحاجة إلى كتابة بريد إلكتروني احترافي، أو تلخيص مقال طويل، أو إنشاء عرض تقديمي.</li>
+                    <li><strong>تسهيل تعلمك:</strong> من شرح المفاهيم المعقدة إلى إنشاء اختبارات للمراجعة.</li>
+                </ul>
+                <h3 className="text-lg font-semibold pt-2">القوة الدافعة: Gemini API</h3>
+                <p>يعتمد MZ بشكل أساسي على نماذج Gemini المتقدمة من Google. هذا يضمن أنك تحصل على إجابات دقيقة، ومحتوى إبداعي عالي الجودة، ونتائج متطورة في جميع الأدوات التي نقدمها.</p>
+                 <h3 className="text-lg font-semibold pt-2">نحن نستمع إليك</h3>
+                <p>هذا التطبيق ينمو ويتطور باستمرار. ملاحظاتك واقتراحاتك هي أغلى ما نملك. ندعوك لاستكشاف جميع الأدوات، وتجربة كل الميزات، وإخبارنا برأيك. معًا، يمكننا بناء المساعد الذكي الأفضل.</p>
+            </div>
+        )
+    },
     {
         id: 'image-gen-guide',
         title: 'دليل المبتدئين لتوليد صور مذهلة',
@@ -60,40 +85,6 @@ const articles: Article[] = [
                 <p>بعد كتابة الوصف واختيار التقنية، اضغط على "توليد". سيظهر الكود المصدري ويمكنك معاينته مباشرة في المتصفح. يمكنك نسخ هذا الكود واستخدامه في أي مكان!</p>
             </div>
         )
-    },
-    {
-        id: 'image-vs-video',
-        title: 'مقارنة: توليد الصور مقابل الفيديو',
-        category: 'مقارنة',
-        summary: 'كلتا الأداتين تحولان النص إلى محتوى مرئي، لكنهما تخدمان أغراضًا مختلفة. اكتشف الفروقات الرئيسية واختر الأنسب لمشروعك.',
-        content: (
-            <div className="space-y-4">
-                <p>تعد أدوات توليد الصور والفيديو من أقوى الميزات في التطبيق، لكن لكل منها نقاط قوة واستخدامات مثالية. دعنا نوضح الفروقات لمساعدتك على الاختيار.</p>
-                <h3 className="text-lg font-semibold pt-2">أداة توليد الصور: قوة اللحظة الثابتة</h3>
-                <p>استخدمها عندما تحتاج إلى:</p>
-                <ul className="list-disc list-inside space-y-2 pl-4">
-                    <li>إنشاء فنون مفاهيمية أو رسوم توضيحية.</li>
-                    <li>تصميم منشورات فريدة لوسائل التواصل الاجتماعي.</li>
-                    <li>الحصول على إلهام بصري لمشروع ما.</li>
-                    <li>إنشاء شعارات أو أيقونات بسيطة.</li>
-                </ul>
-                 <h3 className="text-lg font-semibold pt-2">أداة توليد الفيديو: فن الحركة والسرد</h3>
-                <p>استخدمها عندما تريد:</p>
-                 <ul className="list-disc list-inside space-y-2 pl-4">
-                    <li>إضفاء الحيوية على مشهد أو شخصية.</li>
-                    <li>إنشاء مقاطع فيديو قصيرة أو إعلانات.</li>
-                    <li>تحويل فكرة إلى قصة متحركة.</li>
-                    <li>إنشاء رسوم متحركة بسيطة (GIFs).</li>
-                </ul>
-                <h3 className="text-lg font-semibold pt-2">الفروقات الرئيسية</h3>
-                 <ul className="list-disc list-inside space-y-2 pl-4">
-                    <li><strong>الوقت:</strong> توليد الفيديو يستغرق وقتًا أطول بكثير من توليد الصور.</li>
-                    <li><strong>التعقيد:</strong> وصف الفيديو قد يحتاج إلى التفكير في الحركة والاتجاه بمرور الوقت.</li>
-                    <li><strong>النتيجة:</strong> الصورة هي لقطة واحدة، بينما الفيديو هو سلسلة من اللقطات.</li>
-                </ul>
-                <p className="pt-2"><strong>نصيحة احترافية:</strong> يمكنك توليد صورة لشخصية معينة ثم استخدام وصف مشابه في أداة الفيديو لمحاولة تحريكها!</p>
-            </div>
-        )
     }
 ];
 
@@ -103,17 +94,17 @@ const Blog: React.FC = () => {
     if (selectedArticle) {
         return (
             <div className="flex flex-col h-full overflow-y-auto">
-                <div className="p-4 md:p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
+                <div className="p-4 md:p-6 bg-[var(--panel-dark)] backdrop-blur-sm border-b border-[var(--border-color)]">
                      <button onClick={() => setSelectedArticle(null)} className="flex items-center gap-2 text-sm font-semibold text-teal-600 dark:text-teal-400 hover:opacity-80 transition-opacity">
                         <BackIcon className="w-5 h-5" />
                         العودة إلى كل المقالات
                     </button>
                 </div>
                 <div className="flex-1 p-4 md:p-6">
-                    <div className="max-w-4xl mx-auto bg-slate-50 dark:bg-slate-800 p-6 md:p-8 rounded-lg">
-                        <span className="text-sm font-semibold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-3 py-1 rounded-full">{selectedArticle.category}</span>
-                        <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mt-4 mb-6">{selectedArticle.title}</h1>
-                        <div className="text-slate-700 dark:text-slate-300 leading-relaxed prose dark:prose-invert max-w-none">
+                    <div className="max-w-4xl mx-auto bg-slate-800 p-6 md:p-8 rounded-lg">
+                        <span className="text-sm font-semibold text-amber-400 bg-amber-900/50 px-3 py-1 rounded-full">{selectedArticle.category}</span>
+                        <h1 className="text-2xl md:text-3xl font-bold text-white mt-4 mb-6">{selectedArticle.title}</h1>
+                        <div className="text-slate-300 leading-relaxed prose prose-invert max-w-none">
                             {selectedArticle.content}
                         </div>
                     </div>
@@ -124,13 +115,13 @@ const Blog: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <div className="p-4 md:p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
+            <div className="p-4 md:p-6 bg-[var(--panel-dark)] backdrop-blur-sm border-b border-[var(--border-color)]">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-xl font-bold text-amber-600 dark:text-amber-300 mb-2 text-center flex items-center justify-center gap-2">
+                    <h2 className="text-xl font-bold text-amber-300 mb-2 text-center flex items-center justify-center gap-2">
                         <ArticleIcon className="w-6 h-6" />
                         مقالات / مدونة
                     </h2>
-                    <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-center text-sm text-slate-400">
                         شروحات ومقارنات لمساعدتك على إتقان أدوات الذكاء الاصطناعي.
                     </p>
                 </div>
@@ -141,11 +132,11 @@ const Blog: React.FC = () => {
                         <div
                             key={article.id}
                             onClick={() => setSelectedArticle(article)}
-                            className="bg-slate-100 dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-lg hover:border-amber-500 dark:hover:border-amber-400 transition-all duration-300 flex flex-col"
+                            className="bg-slate-800 rounded-lg p-6 border border-slate-700 cursor-pointer hover:shadow-lg hover:border-amber-400 transition-all duration-300 flex flex-col"
                         >
-                            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 px-2 py-1 rounded-full self-start">{article.category}</span>
-                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200 mt-3 mb-2 flex-1">{article.title}</h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">{article.summary}</p>
+                            <span className="text-xs font-semibold text-amber-400 bg-amber-900/50 px-2 py-1 rounded-full self-start">{article.category}</span>
+                            <h3 className="text-lg font-bold text-slate-200 mt-3 mb-2 flex-1">{article.title}</h3>
+                            <p className="text-sm text-slate-400">{article.summary}</p>
                         </div>
                     ))}
                 </div>
@@ -153,9 +144,5 @@ const Blog: React.FC = () => {
         </div>
     );
 };
-
-
-// FIX: Removed duplicate local declaration of BackIcon to resolve conflict.
-// The component is already imported from './icons/BackIcon'.
 
 export default Blog;
