@@ -41,27 +41,94 @@
         transition: none !important;
       }
 
-      /* Animated Background */
-      @keyframes move-stars {
-        from { transform: translateY(0px); }
-        to   { transform: translateY(-2000px); }
+      /* New Animated Background */
+      #space-background {
+        background: #000 url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAIRlWElmTU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAITAAMAAAABAAEAAIdpAAQAAAABAAAAWgAAAAAAAACQAAAAAQAAAJAAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAACCgAwAEAAAAAQAAACAAAAAQdLtPAAAACVBMVEX///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADc6urZAAAAA3RSTlMAAQIFAMb/7fQAAABQSURBVHgBY2BgcGCwYDBgMGBgYDBhAIsZGCBMYmBgYGBgZGBgYGBkYGCQYTBgYMiAIsgYGBgYGEAYGBgZGBgYGBgYGBkYmBgYGAEAAB1tAX2F3sEeAAAAAElFTkSuQmCC') repeat;
       }
-      .stars {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-        background: transparent url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 2000"><circle fill="%23fff" cx="200" cy="200" r="1.5"/><circle fill="%23fff" cx="500" cy="800" r="1"/><circle fill="%23fff" cx="900" cy="300" r="1.2"/><circle fill="%23fff" cx="1200" cy="1100" r="1"/><circle fill="%23fff" cx="1500" cy="600" r="1.8"/><circle fill="%23fff" cx="1800" cy="1400" r="1"/><circle fill="%23fff" cx="300" cy="1600" r="1.1"/><circle fill="%23fff" cx="1000" cy="1800" r="0.8"/><circle fill="%23fff" cx="700" cy="1300" r="1.3"/><circle fill="%23fff" cx="1600" cy="100" r="1.5"/></svg>') repeat-y;
-        background-size: 2000px 2000px;
-        animation: move-stars 200s linear infinite;
-        opacity: 0.5;
+
+      @keyframes move-twink-back {
+          from {background-position:0 0;}
+          to {background-position:-10000px 5000px;}
       }
-      .stars2 { animation-duration: 150s; opacity: 0.7; }
-      .stars3 { animation-duration: 100s; opacity: 0.9; }
+
+      .twinkling {
+          width:10000px;
+          height: 100%;
+          background: transparent url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAIRlWElmTU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgEoAAMAAAABAAIAAAITAAMAAAABAAEAAIdpAAQAAAABAAAAWgAAAAAAAACQAAAAAQAAAJAAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAACCgAwAEAAAAAQAAACAAAAAQdLtPAAAAFlBMVEX39/cAAAAAAAAAAAAAAAAAAAAAAACtQEvIAAAAB3RSTlMAAQIEChojQIy9wYoAAABDSURBVHgBY2BgcGCwYDBgMGBgYDBhAIsZGCBMYmBgYGBgZGBgYGBkYGCQYTBgYMiAIsgYGBgYGEAYGBgZGBgYGBgYGBkYmBgYGAEAAB97AX2W05hIAAAAAElFTkSuQmCC") repeat;
+          background-size: 1000px 1000px;
+          position: absolute;
+          right: 0;
+          top: 0;
+          bottom: 0;
+          z-index: 1;
+          animation: move-twink-back 200s linear infinite;
+      }
+
+      @keyframes nebula-pulse {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.05); }
+      }
+
+      .nebula {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          background: radial-gradient(circle at 20% 30%, var(--neon-cyan) 0%, rgba(0, 240, 255, 0) 40%),
+                      radial-gradient(circle at 80% 70%, var(--neon-magenta) 0%, rgba(255, 0, 255, 0) 35%);
+          animation: nebula-pulse 30s ease-in-out infinite;
+          z-index: 0;
+      }
+
+      .planets {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          z-index: 2;
+      }
+
+      @keyframes move-planet {
+          0% { transform: translate(-20vw, 0) scale(1); }
+          50% { transform: scale(1.1); }
+          100% { transform: translate(120vw, -10vh) scale(1); }
+      }
+      @keyframes move-planet2 {
+          0% { transform: translate(-30vw, 0); }
+          100% { transform: translate(130vw, 20vh); }
+      }
+
+      .planet {
+          position: absolute;
+          border-radius: 50%;
+          box-shadow: 0 0 40px 5px rgba(255, 255, 255, 0.15);
+      }
+      .planet1 {
+          width: 10vmax;
+          height: 10vmax;
+          background: radial-gradient(circle at 30% 30%, #ffcc66, #993300);
+          top: 20%;
+          left: 0;
+          animation: move-planet 180s linear infinite;
+      }
+      .planet2 {
+          width: 5vmax;
+          height: 5vmax;
+          background: radial-gradient(circle at 70% 70%, #66aaff, #003366);
+          top: 60%;
+          left: 0;
+          animation: move-planet2 120s linear infinite 30s;
+      }
+      .planet3 {
+          width: 3vmax;
+          height: 3vmax;
+          background: radial-gradient(circle at 50% 50%, #ff9999, #cc0000);
+          top: 45%;
+          right: 15%;
+          opacity: 0.5;
+      }
     </style>
   <script type="importmap">
 {
@@ -80,10 +147,14 @@
 </head>
   <body class="dark">
     <div id="root"></div>
-    <div class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden">
-      <div class="stars"></div>
-      <div class="stars2"></div>
-      <div class="stars3"></div>
+    <div id="space-background" class="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden">
+      <div class="twinkling"></div>
+      <div class="nebula"></div>
+      <div class="planets">
+        <div class="planet planet1"></div>
+        <div class="planet planet2"></div>
+        <div class="planet planet3"></div>
+      </div>
     </div>
     <script type="module" src="/index.tsx"></script>
   </body>

@@ -12,6 +12,7 @@ import { View } from './types';
 import * as settingsService from './services/settingsService';
 import WelcomeScreen from './components/WelcomeScreen';
 import * as userService from './services/userService';
+import ApiBanner from './components/ApiBanner';
 
 const App: React.FC = () => {
   const {
@@ -29,10 +30,15 @@ const App: React.FC = () => {
   const [userName, setUserName] = useState<string | null>(() => userService.getUserName());
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [currentView, setCurrentView] = useState<View>('chat');
+  const [isApiConfigured, setIsApiConfigured] = useState(true);
 
   useEffect(() => {
     // Cyberpunk theme is always dark
     document.documentElement.classList.add('dark');
+    // Check if the API key is configured.
+    if (!process.env.API_KEY) {
+      setIsApiConfigured(false);
+    }
   }, []);
   
   const handleSetUserName = (name: string) => {
@@ -99,23 +105,26 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-row-reverse h-screen bg-transparent text-slate-200 font-sans overflow-hidden">
-      <HistorySidebar
-        history={history}
-        currentChatId={currentChat?.id || null}
-        onNewChat={handleNewChat}
-        onLoadChat={handleLoadChat}
-        onDeleteChat={deleteChat}
-        isOpen={isSidebarOpen}
-        closeSidebar={() => setSidebarOpen(false)}
-        onSetView={handleSetView}
-        currentView={currentView}
-      />
-      <div className="flex flex-col flex-1 min-w-0">
-        <Header onToggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
-        <main className="flex-1 overflow-hidden relative">
-          {renderCurrentView()}
-        </main>
+    <div className="flex flex-col h-screen bg-transparent text-slate-200 font-sans overflow-hidden">
+      {!isApiConfigured && <ApiBanner />}
+      <div className="flex flex-row-reverse flex-1 min-h-0">
+        <HistorySidebar
+          history={history}
+          currentChatId={currentChat?.id || null}
+          onNewChat={handleNewChat}
+          onLoadChat={handleLoadChat}
+          onDeleteChat={deleteChat}
+          isOpen={isSidebarOpen}
+          closeSidebar={() => setSidebarOpen(false)}
+          onSetView={handleSetView}
+          currentView={currentView}
+        />
+        <div className="flex flex-col flex-1 min-w-0">
+          <Header onToggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
+          <main className="flex-1 overflow-hidden relative">
+            {renderCurrentView()}
+          </main>
+        </div>
       </div>
     </div>
   );
