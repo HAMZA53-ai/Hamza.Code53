@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { generateWebsite } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
@@ -10,15 +11,17 @@ import BackIcon from './icons/BackIcon';
 import DownloadIcon from './icons/DownloadIcon';
 import ShareIcon from './icons/ShareIcon';
 import ExternalLinkIcon from './icons/ExternalLinkIcon';
+import { getToolSettings } from '../services/toolSettingsService';
 
 interface WebsiteGeneratorProps {
   onBack: () => void;
 }
 
 const WebsiteGenerator: React.FC<WebsiteGeneratorProps> = ({ onBack }) => {
+  const settings = getToolSettings();
   const [prompt, setPrompt] = useState('');
-  const [techStack, setTechStack] = useState<WebTechStack>('tailwind');
-  const [language, setLanguage] = useState('Arabic');
+  const [techStack, setTechStack] = useState<WebTechStack>(settings.websiteGenerator?.techStack || 'tailwind');
+  const [language, setLanguage] = useState(settings.websiteGenerator?.language || 'Arabic');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
@@ -206,7 +209,7 @@ const WebsiteGenerator: React.FC<WebsiteGeneratorProps> = ({ onBack }) => {
                 {activeTab === 'preview' ? (
                      <iframe
                         srcDoc={generatedCode}
-                        title="Website Preview"
+                        title="معاينة الموقع"
                         className="w-full h-[60vh] border border-slate-300 dark:border-slate-700 rounded-lg bg-white"
                         sandbox="allow-scripts allow-same-origin"
                     />

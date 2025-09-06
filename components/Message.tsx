@@ -63,7 +63,7 @@ const Message: React.FC<MessageProps> = ({ message }) => {
                 <img
                   key={index}
                   src={`data:${part.mimeType};base64,${part.data}`}
-                  alt="User upload"
+                  alt="صورة مرفوعة من المستخدم"
                   className="rounded-lg max-w-xs my-2"
                 />
               );

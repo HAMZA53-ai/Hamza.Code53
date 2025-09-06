@@ -18,6 +18,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
   const [text, setText] = useState('');
   const [image, setImage] = useState<{ file: File; preview: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
+
 
   const handleSend = () => {
     if ((text.trim() || image) && !disabled) {
@@ -40,7 +43,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setImage({ file, preview: URL.createObjectURL(file) });
+      if (file.type.startsWith('image/')) {
+        setImage({ file, preview: URL.createObjectURL(file) });
+      }
     }
   };
 
@@ -55,6 +60,42 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
     setText(e.target.value);
     e.target.style.height = 'auto';
     e.target.style.height = `${e.target.scrollHeight}px`;
+  };
+  
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        setImage({ file, preview: URL.createObjectURL(file) });
+      }
+    }
   };
 
   const ModeButton: React.FC<{
@@ -79,7 +120,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
   );
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div 
+        className="w-full max-w-4xl mx-auto relative"
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+    >
+        {isDragging && (
+            <div className="absolute inset-0 bg-[var(--panel-dark)]/80 backdrop-blur-sm flex items-center justify-center rounded-xl z-20 border-2 border-dashed border-[var(--neon-cyan)]">
+                <p className="text-lg font-bold text-[var(--neon-cyan)] [text-shadow:var(--glow-cyan-light)]">أفلت الصورة هنا لإرفاقها</p>
+            </div>
+        )}
       {image && (
         <div className="mb-2 p-2 bg-[var(--panel-dark)] border border-[var(--border-color)] rounded-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -121,7 +173,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
           className="p-1.5 sm:p-2 text-slate-400 hover:text-[var(--neon-cyan)] disabled:text-slate-600 disabled:cursor-not-allowed transition-colors"
-          aria-label="Attach image"
+          aria-label="إرفاق صورة"
         >
           <PaperclipIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
@@ -129,7 +181,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend, disabled, chatMode, setCh
           onClick={handleSend}
           disabled={disabled || (!text.trim() && !image)}
           className="p-2 sm:p-3 bg-[var(--neon-cyan)] text-black rounded-lg hover:shadow-[var(--glow-active)] disabled:bg-slate-600 disabled:text-slate-400 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-300"
-          aria-label="Send message"
+          aria-label="إرسال رسالة"
         >
           <SendIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>

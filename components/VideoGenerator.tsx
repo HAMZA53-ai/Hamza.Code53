@@ -1,10 +1,13 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVideo, getVideoOperationStatus, getActiveApiKey } from '../services/aiService';
 import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import VideoIcon from './icons/VideoIcon';
 import BackIcon from './icons/BackIcon';
+import ImageIcon from './icons/ImageIcon';
+
 
 const loadingMessages = [
     "جارٍ إعداد المشهد...",
@@ -21,15 +24,19 @@ interface VideoGeneratorProps {
 
 const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
     const [prompt, setPrompt] = useState('');
+    const [image, setImage] = useState<{ file: File; preview: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
     const [submittedPrompt, setSubmittedPrompt] = useState('');
+    const [isDragging, setIsDragging] = useState(false);
     
     const intervalRef = useRef<number | null>(null);
     const messageIntervalRef = useRef<number | null>(null);
     const creationIdRef = useRef<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const dragCounter = useRef(0);
 
     const cleanupIntervals = () => {
         if (intervalRef.current) {
@@ -116,7 +123,19 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
         });
 
         try {
-            const operation = await generateVideo(prompt);
+            let imageData: { data: string; mimeType: string } | undefined = undefined;
+            if (image) {
+                imageData = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const base64Data = (event.target?.result as string).split(',')[1];
+                        resolve({ data: base64Data, mimeType: image.file.type });
+                    };
+                    reader.onerror = (error) => reject(error);
+                    reader.readAsDataURL(image.file);
+                });
+            }
+            const operation = await generateVideo(prompt, imageData);
             pollOperation(operation);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'حدث خطأ غير متوقع.';
@@ -125,6 +144,49 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
             setIsLoading(false);
         }
     };
+
+    const handleFileChange = (file: File | null) => {
+        if (file && file.type.startsWith('image/')) {
+            setImage({ file, preview: URL.createObjectURL(file) });
+            setError(null);
+        } else {
+            setError('الرجاء تحديد ملف صورة صالح.');
+        }
+    };
+    
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter.current++;
+        if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+            setIsDragging(true);
+        }
+    };
+    
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragCounter.current--;
+        if (dragCounter.current === 0) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        dragCounter.current = 0;
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleFileChange(e.dataTransfer.files[0]);
+        }
+    };
+
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
@@ -144,6 +206,42 @@ const VideoGenerator: React.FC<VideoGeneratorProps> = ({ onBack }) => {
                             rows={3}
                             disabled={isLoading}
                         />
+                        <div>
+                            <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">
+                                صورة اختيارية (لتحريكها أو استخدامها كمرجع)
+                            </label>
+                            {image ? (
+                                <div className="relative w-48 mx-auto">
+                                    <img src={image.preview} alt="Preview" className="w-full h-auto rounded-lg shadow-md" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setImage(null)}
+                                        className="absolute -top-2 -right-2 text-white bg-red-600 rounded-full p-1 leading-none w-6 h-6 flex items-center justify-center text-xs"
+                                        aria-label="إزالة الصورة"
+                                    >
+                                        &#x2715;
+                                    </button>
+                                </div>
+                            ) : (
+                                <div 
+                                    onDrop={handleDrop} 
+                                    onDragOver={handleDragOver}
+                                    onDragEnter={handleDragEnter}
+                                    onDragLeave={handleDragLeave}
+                                    className="relative w-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center transition-colors"
+                                >
+                                    {isDragging && (
+                                        <div className="absolute inset-0 bg-slate-800/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10 border-2 border-blue-500">
+                                            <p className="text-xl font-bold text-blue-300">أفلت الصورة هنا</p>
+                                        </div>
+                                    )}
+                                    <ImageIcon className="w-12 h-12 mx-auto text-slate-400 mb-2" />
+                                    <p className="font-semibold text-sm text-slate-700 dark:text-slate-300">اسحب وأفلت صورة أو</p>
+                                    <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline font-semibold">اختر ملفًا</button>
+                                    <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e.target.files ? e.target.files[0] : null)} className="hidden" accept="image/*" />
+                                </div>
+                            )}
+                        </div>
                         <button
                             type="submit"
                             disabled={isLoading || !prompt.trim()}

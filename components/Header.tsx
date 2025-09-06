@@ -11,7 +11,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
       <div className="flex-1"></div>
       <h1 className="text-xl sm:text-2xl font-bold text-center text-[var(--neon-cyan)] [text-shadow:var(--glow-cyan)]">MZ</h1>
       <div className="flex-1 flex justify-end">
-        <button onClick={onToggleSidebar} className="p-2 text-slate-300 hover:text-[var(--neon-cyan)] transition-colors" aria-label="Toggle sidebar">
+        <button onClick={onToggleSidebar} className="p-2 text-slate-300 hover:text-[var(--neon-cyan)] transition-colors" aria-label="تبديل الشريط الجانبي">
             <SidebarIcon className="w-6 h-6" />
         </button>
       </div>

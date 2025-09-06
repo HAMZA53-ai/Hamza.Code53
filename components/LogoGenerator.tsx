@@ -5,14 +5,16 @@ import * as creationsService from '../services/creationsService';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
 import SparkleIcon from './icons/SparkleIcon';
+import { getToolSettings } from '../services/toolSettingsService';
 
 interface LogoGeneratorProps {
     onBack: () => void;
 }
 
 const LogoGenerator: React.FC<LogoGeneratorProps> = ({ onBack }) => {
+  const settings = getToolSettings();
   const [prompt, setPrompt] = useState('');
-  const [style, setStyle] = useState('minimalist');
+  const [style, setStyle] = useState(settings.logoGenerator?.style || 'minimalist');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
@@ -114,7 +116,7 @@ const LogoGenerator: React.FC<LogoGeneratorProps> = ({ onBack }) => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {images.map((imgSrc, index) => (
                 <div key={index} className="bg-white dark:bg-slate-200 p-2 rounded-lg shadow-md">
-                  <img src={imgSrc} alt={`Generated logo ${index + 1}`} className="w-full object-contain rounded-md" />
+                  <img src={imgSrc} alt={`شعار مولد ${index + 1}`} className="w-full object-contain rounded-md" />
                 </div>
               ))}
             </div>

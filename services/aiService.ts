@@ -1,9 +1,10 @@
 
+
 import { GoogleGenAI, GenerateContentResponse, GenerateImagesResponse, Type, Content, Modality } from "@google/genai";
 import { ChatMessage, ChatRole, DebugInfo, QuizQuestion, QuizType, Slide, WebTechStack, MessagePart, ChatMode, VideoAnalysisResult } from "../types";
 import { getGeminiApiKey } from './apiKeyService';
 
-// --- Centralized API Key Management ---
+// --- إدارة مركزية لمفتاح API ---
 export const getActiveApiKey = (): string | null => {
     const userKey = getGeminiApiKey();
     if (userKey) {
@@ -12,9 +13,9 @@ export const getActiveApiKey = (): string | null => {
     return process.env.API_KEY || null;
 }
 
-// --- Generic Error Handling ---
+// --- معالجة الأخطاء العامة ---
 const handleApiError = (error: unknown, context: string): Error => {
-    console.error(`AI Service Error (${context}):`, error);
+    console.error(`خطأ في خدمة الذكاء الاصطناعي (${context}):`, error);
     if (error instanceof Error) {
         if (error.message.includes('API is only accessible to billed users')) {
             return new Error("للاستفادة من ميزات توليد الصور والفيديو، يجب أن يكون حساب Google Cloud الخاص بك مفوترًا. يرجى تفعيل الفوترة في مشروعك على Google Cloud ثم المحاولة مرة أخرى.");
@@ -40,7 +41,7 @@ const handleApiError = (error: unknown, context: string): Error => {
                      return new Error(`[${status || code || 'خطأ في الواجهة'}] ${message || 'حدث خطأ غير معروف في واجهة برمجة التطبيقات.'}`);
                 }
             } catch (e) {
-                // Parsing failed, fall through
+                // فشل التحليل، استمر
             }
         }
         return new Error(`حدث خطأ أثناء ${context}: ${error.message}`);
@@ -48,7 +49,7 @@ const handleApiError = (error: unknown, context: string): Error => {
     return new Error(`حدث خطأ غير معروف أثناء ${context}.`);
 };
 
-// --- Gemini Implementation ---
+// --- تطبيق Gemini ---
 const getGeminiInstance = (): GoogleGenAI => {
     const apiKey = getActiveApiKey();
     if (!apiKey) {
@@ -86,14 +87,14 @@ const runGeminiQuery = async (
   switch (chatMode) {
     case 'google_search':
       config.tools = [{googleSearch: {}}];
-      config.systemInstruction = "You are a helpful AI assistant called 'MZ'. Your main language is Arabic. When using Google Search, you MUST cite your sources. Format citations at the end of your answer. You are not a JSON endpoint.";
+      config.systemInstruction = "أنت مساعد ذكاء اصطناعي مفيد يُدعى 'MZ'. لغتك الأساسية هي العربية. عند استخدام بحث جوجل، يجب عليك ذكر مصادرك. قم بتنسيق الاقتباسات في نهاية إجابتك. أنت لست نقطة نهاية JSON.";
       break;
     case 'quick_response':
       config.thinkingConfig = { thinkingBudget: 0 };
-      config.systemInstruction = "You are 'MZ'. Provide quick, concise, and direct answers in Arabic. Be brief. Use emojis where appropriate.";
+      config.systemInstruction = "أنت 'MZ'. قدم إجابات سريعة وموجزة ومباشرة باللغة العربية. كن مختصرًا. استخدم الرموز التعبيرية عند الاقتضاء.";
       break;
     case 'learning':
-      config.systemInstruction = "You are 'MZ' in learning mode. The user is providing you with information to remember for this conversation. Acknowledge that you have received the information and will remember it. Briefly confirm what you've learned in one sentence, in Arabic.";
+      config.systemInstruction = "أنت 'MZ' في وضع التعلم. يقوم المستخدم بتزويدك بمعلومات لتتذكرها في هذه المحادثة. أقر بأنك تلقيت المعلومات وسوف تتذكرها. قم بتأكيد ما تعلمته بإيجاز في جملة واحدة باللغة العربية.";
       break;
     default:
       config.systemInstruction = "أنت مساعد ذكاء اصطناعي ودود ومبدع يُدعى 'MZ'. يجب أن تكون إجاباتك دقيقة ومفصلة ومفيدة باللغة العربية. استخدم الرموز التعبيرية (الإيموجي) بشكل مناسب لإضفاء طابع ودي وجذاب على المحادثة. تصرف بأسلوب مشابه لـ ChatGPT.";
@@ -142,7 +143,7 @@ const runGeminiQuery = async (
 };
 
 
-// --- Public Facade Functions ---
+// --- وظائف الواجهة العامة ---
 
 export const runQuery = async (
     conversationHistory: ChatMessage[],
@@ -155,7 +156,7 @@ export const runQuery = async (
     }
 };
 
-// --- Gemini-Exclusive Functions ---
+// --- وظائف حصرية لـ Gemini ---
 
 type AspectRatio = "1:1" | "9:16" | "16:9" | "4:3" | "3:4";
 
@@ -272,16 +273,26 @@ export const generateLogo = async (prompt: string, style: string): Promise<strin
     }
 };
 
-export const generateVideo = async (prompt: string): Promise<any> => {
+export const generateVideo = async (prompt: string, image?: { data: string, mimeType: string }): Promise<any> => {
     try {
         const ai = getGeminiInstance();
-        const operation = await ai.models.generateVideos({
+        
+        const requestPayload: any = {
             model: 'veo-2.0-generate-001',
             prompt: prompt,
             config: {
                 numberOfVideos: 1
             }
-        });
+        };
+
+        if (image) {
+            requestPayload.image = {
+                imageBytes: image.data,
+                mimeType: image.mimeType
+            };
+        }
+
+        const operation = await ai.models.generateVideos(requestPayload);
         return operation;
     } catch (error) {
         throw handleApiError(error, "توليد الفيديو");
@@ -299,7 +310,7 @@ export const getVideoOperationStatus = async (operation: any): Promise<any> => {
 };
 
 
-// --- Provider-Agnostic Text-Based Functions ---
+// --- وظائف نصية مستقلة عن المزود ---
 
 const runTextGeneration = async (contents: MessagePart[], systemInstruction: string, jsonSchema?: any): Promise<string> => {
     try {
@@ -327,23 +338,23 @@ export const generateWebsite = async (prompt: string, techStack: WebTechStack, l
 
 export const explainConcept = (topic: string) => runTextGeneration(
     [{ type: 'text', text: `Explain this concept: "${topic}"` }],
-    "You are an expert educator. Explain concepts in a clear, concise, and easy-to-understand way for a high school student. Use analogies, examples, and markdown for formatting."
+    "أنت معلم خبير. اشرح المفاهيم بطريقة واضحة وموجزة وسهلة الفهم لطالب في المدرسة الثانوية. استخدم التشبيهات والأمثلة وتنسيق markdown."
 );
 
 export const translateText = (text: string, targetLanguage: string) => runTextGeneration(
     [{ type: 'text', text: `Translate the following text to ${targetLanguage}. Provide only the translated text: "${text}"` }],
-    "You are a professional translator. Provide only the translated text, without any additional comments or explanations."
+    "أنت مترجم محترف. قدم النص المترجم فقط، دون أي تعليقات أو شروحات إضافية."
 );
 
 export const summarizeText = (text: string) => runTextGeneration(
     [{ type: 'text', text: `Summarize the following text in a few key points: "${text}"` }],
-    "You are an expert at summarizing long texts. Extract the main ideas and present them as a concise summary. Use bullet points if appropriate."
+    "أنت خبير في تلخيص النصوص الطويلة. استخرج الأفكار الرئيسية وقدمها كملخص موجز. استخدم النقاط إذا كان ذلك مناسبًا."
 );
 
 export const generateQuiz = async (text: string, type: QuizType, count: number): Promise<QuizQuestion[]> => {
     const jsonString = await runTextGeneration(
         [{ type: 'text', text: `Generate a quiz with ${count} questions of type '${type}' based on the following text. Ensure the questions are relevant and cover the main points of the text. For multiple-choice questions, provide 4 options. Text: """${text}"""` }],
-        "You are an AI assistant designed to create educational quizzes. Generate high-quality questions based on the provided text and return the output in the specified JSON format. The answer for multiple-choice questions must be one of the provided options.",
+        "أنت مساعد ذكاء اصطناعي مصمم لإنشاء اختبارات تعليمية. قم بإنشاء أسئلة عالية الجودة بناءً على النص المقدم وأرجع الإخراج بتنسيق JSON المحدد. يجب أن يكون الجواب للأسئلة متعددة الخيارات أحد الخيارات المقدمة.",
         {
             type: Type.ARRAY,
             items: {
@@ -367,7 +378,7 @@ export const generateTextForTool = async (prompt: string, systemInstruction: str
 export const generateSlides = async (topic: string): Promise<Slide[]> => {
     const jsonString = await runTextGeneration(
         [{ type: 'text', text: `Create a concise and informative slide presentation on the topic: "${topic}". Generate 5 to 7 slides.` }],
-        "You are an expert at creating slide presentations. For each slide, provide a short title and 3-5 bullet points as a single string with each point starting with a hyphen.",
+        "أنت خبير في إنشاء العروض التقديمية. لكل شريحة، قدم عنوانًا قصيرًا و 3-5 نقاط كنص واحد مع بدء كل نقطة بشرطة.",
         {
             type: Type.ARRAY,
             items: {
@@ -386,19 +397,19 @@ export const generateSlides = async (topic: string): Promise<Slide[]> => {
 export const summarizeAndQuizVideo = async (videoUrl: string): Promise<VideoAnalysisResult> => {
     const jsonString = await runTextGeneration(
         [{ type: 'text', text: `Analyze the video from this URL: ${videoUrl}. Provide a concise summary of its content in Arabic and then generate a 5-question multiple-choice quiz in Arabic based on the video's key points. The video is likely a YouTube video. If you cannot access the video content, you MUST report an error and not invent information.` }],
-        "You are an AI assistant specialized in analyzing video content from URLs. You will provide a summary and a quiz in ARABIC, in the specified JSON format. Your capabilities for analyzing videos are experimental; if you cannot access the content, you MUST state that you cannot access it in your error message. Do not invent content.",
+        "أنت مساعد ذكاء اصطناعي متخصص في تحليل محتوى الفيديو من الروابط. ستقدم ملخصًا واختبارًا باللغة العربية، بتنسيق JSON المحدد. قدراتك على تحليل الفيديو تجريبية؛ إذا لم تتمكن من الوصول إلى المحتوى، يجب عليك الإبلاغ عن خطأ وعدم اختلاق معلومات. لا تخترع محتوى.",
         {
             type: Type.OBJECT,
             properties: {
-                summary: { type: Type.STRING, description: "A concise summary of the video content in Arabic." },
+                summary: { type: Type.STRING, description: "ملخص موجز لمحتوى الفيديو باللغة العربية." },
                 quiz: {
                     type: Type.ARRAY,
                     items: {
                         type: Type.OBJECT,
                         properties: {
-                            question: { type: Type.STRING, description: "The quiz question in Arabic." },
-                            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'An array of 4 potential answers in Arabic.' },
-                            answer: { type: Type.STRING, description: "The correct answer in Arabic." }
+                            question: { type: Type.STRING, description: "سؤال الاختبار باللغة العربية." },
+                            options: { type: Type.ARRAY, items: { type: Type.STRING }, description: 'مصفوفة من 4 إجابات محتملة باللغة العربية.' },
+                            answer: { type: Type.STRING, description: "الإجابة الصحيحة باللغة العربية." }
                         },
                         required: ['question', 'options', 'answer']
                     }
@@ -411,7 +422,7 @@ export const summarizeAndQuizVideo = async (videoUrl: string): Promise<VideoAnal
 };
 
 
-// --- Helper for Website Generator ---
+// --- مساعد لمولد المواقع ---
 const getWebsiteSystemInstruction = (techStack: WebTechStack, language: string): string => {
   const langCodeMapping: { [key: string]: string } = {
     'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'French': 'fr', 'German': 'de', 'Japanese': 'ja', 'Chinese': 'zh', 'Russian': 'ru'
@@ -421,97 +432,97 @@ const getWebsiteSystemInstruction = (techStack: WebTechStack, language: string):
   const htmlTag = `<html lang="${langCode}" dir="${languageDirection}">`;
 
   const commonInstructions = `
-You are an expert web developer with a powerful "Smart Layout Engine". Your task is to generate a COMPLETE, SINGLE-FILE website based on the user's prompt, making intelligent decisions about the structure.
+أنت مطور ويب خبير تمتلك "محرك تخطيط ذكي" قوي. مهمتك هي إنشاء موقع ويب كامل في ملف واحد بناءً على طلب المستخدم، مع اتخاذ قرارات ذكية بشأن الهيكل.
 
-**Step 1: Analyze the User's Request**
-First, determine the TYPE of website the user wants:
-  A) A **Standard Website** (e.g., for a business, portfolio, restaurant, marketing page).
-  B) A **Complex Application Simulation** (e.g., "a page like Facebook", "a Trello dashboard", "a Twitter feed").
+**الخطوة 1: تحليل طلب المستخدم**
+أولاً، حدد نوع موقع الويب الذي يريده المستخدم:
+  أ) **موقع ويب قياسي** (على سبيل المثال، لشركة، معرض أعمال، مطعم، صفحة تسويق).
+  ب) **محاكاة تطبيق معقد** (على سبيل المثال، "صفحة مثل فيسبوك"، "لوحة تحكم تريلو"، "صفحة تحديثات تويتر").
 
-**Step 2: Choose the Correct Structure based on your analysis**
+**الخطوة 2: اختر الهيكل الصحيح بناءً على تحليلك**
 
-**IF Type A (Standard Website):**
-You MUST build a professional, multi-section website with the following components in order:
-*   A sticky/fixed navigation bar (Header).
-*   A compelling "Hero" section.
-*   A "Features" or "Services" section.
-*   An "About Us" section.
-*   A "Testimonials" section.
-*   A "Contact Us" form.
-*   A "Footer".
-This structure is proven and effective for business and portfolio sites.
+**إذا كان النوع أ (موقع ويب قياسي):**
+يجب عليك بناء موقع ويب احترافي متعدد الأقسام بالمكونات التالية بالترتيب:
+*   شريط تنقل ثابت (Header).
+*   قسم رئيسي جذاب (Hero Section).
+*   قسم "الميزات" أو "الخدمات".
+*   قسم "من نحن".
+*   قسم "آراء العملاء".
+*   نموذج "اتصل بنا".
+*   "تذييل" (Footer).
+هذا الهيكل مثبت وفعال لمواقع الشركات ومعارض الأعمال.
 
-**IF Type B (Complex Application Simulation):**
-You MUST **IGNORE** the standard structure above. Instead, you must create a custom layout that accurately mimics the requested application.
-*   **Deconstruct the UI:** Think like a UI/UX designer. Break down the application into its core components (e.g., for Facebook: a left sidebar for navigation, a central news feed with post cards, a right sidebar for contacts).
-*   **Build the Layout:** Use divs and CSS (or Tailwind classes) to create the necessary multi-column layout.
-*   **Create Components:** Populate the layout with placeholder components that look like the real application (e.g., create styled divs for posts, each with a user avatar, name, text content, and like/comment buttons).
-*   **Focus on Fidelity:** The goal is to create a high-fidelity, non-functional prototype that visually represents the user's request.
+**إذا كان النوع ب (محاكاة تطبيق معقد):**
+يجب عليك **تجاهل** الهيكل القياسي أعلاه. بدلاً من ذلك، يجب عليك إنشاء تخطيط مخصص يحاكي بدقة التطبيق المطلوب.
+*   **تفكيك واجهة المستخدم:** فكر كمصمم واجهات مستخدم/تجربة مستخدم. قم بتقسيم التطبيق إلى مكوناته الأساسية (على سبيل المثال، لفيسبوك: شريط جانبي أيسر للتنقل، قسم أخبار مركزي مع بطاقات للمنشورات، شريط جانبي أيمن لجهات الاتصال).
+*   **بناء التخطيط:** استخدم عناصر div و CSS (أو كلاسات Tailwind) لإنشاء التخطيط متعدد الأعمدة اللازم.
+*   **إنشاء المكونات:** املأ التخطيط بمكونات وهمية تشبه التطبيق الحقيقي (على سبيل المثال، أنشئ عناصر div منسقة للمنشورات، كل منها يحتوي على صورة رمزية للمستخدم، اسم، محتوى نصي، وأزرار إعجاب/تعليق).
+*   **التركيز على الدقة:** الهدف هو إنشاء نموذج أولي عالي الدقة وغير وظيفي يمثل بصريًا طلب المستخدم.
 
-**CRITICAL REQUIREMENTS FOR BOTH TYPES:**
+**متطلبات حاسمة لكلا النوعين:**
 
-1.  **Content Language:** ALL text content (headings, paragraphs, button text, form labels, etc.) MUST be in **${language}**.
+1.  **لغة المحتوى:** يجب أن يكون كل المحتوى النصي (العناوين، الفقرات، نصوص الأزرار، تسميات النماذج، إلخ) باللغة **${language}**.
 
-2.  **SEO & Accessibility:**
-    *   The HTML MUST include a relevant and descriptive \`<title>\` tag in the \`<head>\`. The title must be in **${language}**.
-    *   The HTML MUST include a relevant \`<meta name="description" content="...">\` tag in the \`<head>\`. The content must be in **${language}**.
-    *   ALL \`<img>\` tags MUST have a descriptive \`alt\` attribute. The alt text should also be in **${language}**.
-    *   Use semantic HTML5 tags like \`<header>\`, \`<nav>\`, \`<main>\`, \`<section>\`, \`<footer>\`. For complex layouts, use \`<div>\` with appropriate class names or ARIA roles.
+2.  **تحسين محركات البحث وإمكانية الوصول:**
+    *   يجب أن يتضمن HTML وسم \`<title>\` ذا صلة ووصفي في \`<head>\`. يجب أن يكون العنوان باللغة **${language}**.
+    *   يجب أن يتضمن HTML وسم \`<meta name="description" content="...">\` ذا صلة في \`<head>\`. يجب أن يكون المحتوى باللغة **${language}**.
+    *   يجب أن تحتوي جميع وسوم \`<img>\` على سمة \`alt\` وصفية. يجب أن يكون النص البديل أيضًا باللغة **${language}**.
+    *   استخدم وسوم HTML5 الدلالية مثل \`<header>\`, \`<nav>\`, \`<main>\`, \`<section>\`, \`<footer>\`. للتخطيطات المعقدة، استخدم \`<div>\` مع أسماء كلاسات مناسبة أو أدوار ARIA.
 
-3.  **Images:** Use high-quality, professional placeholder images from picsum.photos. Use different, descriptive seeds for different images to ensure variety (e.g., seed/hero, seed/avatar1, seed/post_image, etc.).
+3.  **الصور:** استخدم صورًا وهمية عالية الجودة واحترافية من picsum.photos. استخدم "seeds" مختلفة ووصفية للصور المختلفة لضمان التنوع (على سبيل المثال، seed/hero, seed/avatar1, seed/post_image, إلخ).
 
-4.  **Output Format:** The final output MUST BE ONLY THE CODE. Do not include any explanations, comments, or markdown formatting (like \`\`\`html) outside the code itself. The code must be clean, well-formatted, and ready for production.
+4.  **تنسيق الإخراج:** يجب أن يكون الإخراج النهائي هو الكود فقط. لا تقم بتضمين أي شروحات أو تعليقات أو تنسيق markdown (مثل \`\`\`html) خارج الكود نفسه. يجب أن يكون الكود نظيفًا ومنسقًا جيدًا وجاهزًا للإنتاج.
 `;
 
   switch (techStack) {
     case 'tailwind':
       return `${commonInstructions}
-**Technology Stack:**
-*   Create a single HTML file.
-*   It MUST use Tailwind CSS for all styling.
-*   It MUST include the official Tailwind CSS CDN script in the \`<head>\`: \`<script src="https://cdn.tailwindcss.com"></script>\`.
-*   The root element MUST be \`${htmlTag}\`.
+**مجموعة التقنيات:**
+*   أنشئ ملف HTML واحد.
+*   يجب أن يستخدم Tailwind CSS لجميع التنسيقات.
+*   يجب أن يتضمن السكربت الرسمي لـ Tailwind CSS CDN في \`<head>\`: \`<script src="https://cdn.tailwindcss.com"></script>\`.
+*   يجب أن يكون العنصر الجذري \`${htmlTag}\`.
 `;
     case 'react-tailwind':
-      return `You are an expert React developer with a powerful "Smart Layout Engine". Create a single, complete JSX component file for a web page. Assume the user has a React project set up with Tailwind CSS configured. Do not include \`<html>\` or \`<body>\` tags.
+      return `أنت مطور React خبير تمتلك "محرك تخطيط ذكي" قوي. أنشئ ملف مكون JSX واحد وكامل لصفحة ويب. افترض أن المستخدم لديه مشروع React تم إعداده مع تكوين Tailwind CSS. لا تقم بتضمين وسوم \`<html>\` أو \`<body>\`.
 
-**Step 1: Analyze the User's Request**
-First, determine the TYPE of page the user wants:
-  A) A **Standard Website Page** (e.g., for a business, portfolio, restaurant).
-  B) A **Complex Application Simulation** (e.g., "a component for a Facebook-like page", "a Trello dashboard").
+**الخطوة 1: تحليل طلب المستخدم**
+أولاً، حدد نوع الصفحة التي يريدها المستخدم:
+  أ) **صفحة موقع ويب قياسية** (على سبيل المثال، لشركة، معرض أعمال، مطعم).
+  ب) **محاكاة تطبيق معقد** (على سبيل المثال، "مكون لصفحة تشبه فيسبوك"، "لوحة تحكم تريلو").
 
-**Step 2: Choose the Correct Structure**
+**الخطوة 2: اختر الهيكل الصحيح**
 
-**IF Type A (Standard Website Page):**
-You MUST build a professional, multi-section component with a root \`<div>\` containing:
-*   A sticky/fixed navigation bar (\`<header>\`).
-*   A "Hero" section.
-*   A "Features" or "Services" section.
-*   An "About Us" section.
-*   A "Testimonials" section.
-*   A "Contact Us" form.
-*   A "Footer" (\`<footer>\`).
+**إذا كان النوع أ (صفحة موقع ويب قياسية):**
+يجب عليك بناء مكون احترافي متعدد الأقسام مع عنصر \`<div>\` جذري يحتوي على:
+*   شريط تنقل ثابت (\`<header>\`).
+*   قسم رئيسي "Hero".
+*   قسم "الميزات" أو "الخدمات".
+*   قسم "من نحن".
+*   قسم "آراء العملاء".
+*   نموذج "اتصل بنا".
+*   "تذييل" (\`<footer>\`).
 
-**IF Type B (Complex Application Simulation):**
-You MUST **IGNORE** the standard structure. Instead, create a custom layout that accurately mimics the requested application.
-*   **Deconstruct the UI:** Break the application into its core components (e.g., for Facebook: a left sidebar, a central feed with post card components, a right sidebar).
-*   **Build the Layout:** Use divs with Tailwind classes for multi-column layouts.
-*   **Create Components:** Create placeholder components that look like the real application.
+**إذا كان النوع ب (محاكاة تطبيق معقد):**
+يجب عليك **تجاهل** الهيكل القياسي. بدلاً من ذلك، أنشئ تخطيطًا مخصصًا يحاكي بدقة التطبيق المطلوب.
+*   **تفكيك واجهة المستخدم:** قم بتقسيم التطبيق إلى مكوناته الأساسية (على سبيل المثال، لفيسبوك: شريط جانبي أيسر، قسم أخبار مركزي مع مكونات بطاقات للمنشورات، شريط جانبي أيمن).
+*   **بناء التخطيط:** استخدم عناصر div مع كلاسات Tailwind للتخطيطات متعددة الأعمدة.
+*   **إنشاء المكونات:** أنشئ مكونات وهمية تشبه التطبيق الحقيقي.
 
-**CRITICAL REQUIREMENTS FOR BOTH TYPES:**
+**متطلبات حاسمة لكلا النوعين:**
 
-1.  **Content Language:** ALL text content MUST be in **${language}**.
-2.  **Accessibility:** All \`<img>\` tags MUST have descriptive \`alt\` attributes in **${language}**.
-3.  **Images:** Use placeholder images from picsum.photos. Use different seeds.
-4.  **Output Format:** The output must be only the JSX code for the main component, with no explanations or markdown formatting. The component should be a default export.
+1.  **لغة المحتوى:** يجب أن يكون كل المحتوى النصي باللغة **${language}**.
+2.  **إمكانية الوصول:** يجب أن تحتوي جميع وسوم \`<img>\` على سمات \`alt\` وصفية باللغة **${language}**.
+3.  **الصور:** استخدم صورًا وهمية من picsum.photos. استخدم "seeds" مختلفة.
+4.  **تنسيق الإخراج:** يجب أن يكون الإخراج هو كود JSX للمكون الرئيسي فقط، بدون شروحات أو تنسيق markdown. يجب أن يكون المكون تصديرًا افتراضيًا.
 `;
     case 'html-css':
     default:
       return `${commonInstructions}
-**Technology Stack:**
-*   Create a single HTML file.
-*   All CSS styling MUST be contained within a single \`<style>\` tag in the \`<head>\`. Make the design modern and responsive.
-*   The root element MUST be \`${htmlTag}\`.
+**مجموعة التقنيات:**
+*   أنشئ ملف HTML واحد.
+*   يجب أن يكون كل تنسيق CSS موجودًا داخل وسم \`<style>\` واحد في \`<head>\`. اجعل التصميم عصريًا ومتجاوبًا.
+*   يجب أن يكون العنصر الجذري \`${htmlTag}\`.
 `;
   }
 };

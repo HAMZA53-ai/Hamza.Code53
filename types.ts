@@ -73,8 +73,29 @@ export interface Slide {
 
 export type ChatMode = 'default' | 'google_search' | 'quick_response' | 'learning';
 
-// FIX: Add VideoAnalysisResult type for video processing tool.
+// إصلاح: إضافة نوع VideoAnalysisResult لأداة معالجة الفيديو.
 export interface VideoAnalysisResult {
     summary: string;
     quiz: QuizQuestion[];
+}
+
+export interface ToolSettings {
+    imageGenerator?: {
+        aspectRatio: "1:1" | "9:16" | "16:9" | "4:3" | "3:4";
+        numberOfImages: number;
+    };
+    websiteGenerator?: {
+        techStack: WebTechStack;
+        language: string;
+    };
+    quizGenerator?: {
+        quizType: QuizType;
+        questionCount: number;
+    };
+    logoGenerator?: {
+        style: string;
+    };
+    translationSummarization?: {
+        targetLanguage: string;
+    };
 }

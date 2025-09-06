@@ -6,7 +6,7 @@ type Theme = 'light' | 'dark';
 export const getTheme = (): Theme => {
   try {
     const theme = localStorage.getItem(THEME_KEY) as Theme | null;
-    // Default to system preference if no theme is explicitly set
+    // الإعداد الافتراضي هو تفضيل النظام إذا لم يتم تعيين سمة بشكل صريح
     if (!theme) {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             return 'dark';
@@ -16,7 +16,7 @@ export const getTheme = (): Theme => {
     return theme;
   } catch (error) {
     console.error("Failed to get theme from localStorage", error);
-    // Fallback to light theme on error
+    // الرجوع إلى السمة الفاتحة عند حدوث خطأ
     return 'light';
   }
 };

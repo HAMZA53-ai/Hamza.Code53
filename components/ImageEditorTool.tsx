@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useCallback } from 'react';
 import Spinner from './Spinner';
 import BackIcon from './icons/BackIcon';
@@ -34,10 +35,12 @@ const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const dragCounter = useRef(0);
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('image/')) {
@@ -49,22 +52,37 @@ const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, 
         }
     };
     
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
-        e.currentTarget.classList.remove('border-teal-500');
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            handleFileChange(e.dataTransfer.files[0]);
+        e.stopPropagation();
+        dragCounter.current++;
+        if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+            setIsDragging(true);
         }
-    };
-    
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.currentTarget.classList.add('border-teal-500');
     };
     
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
-        e.currentTarget.classList.remove('border-teal-500');
+        e.stopPropagation();
+        dragCounter.current--;
+        if (dragCounter.current === 0) {
+            setIsDragging(false);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+    
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        dragCounter.current = 0;
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleFileChange(e.dataTransfer.files[0]);
+        }
     };
 
     const startCamera = async () => {
@@ -171,9 +189,15 @@ const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, 
                         <div 
                             onDrop={handleDrop} 
                             onDragOver={handleDragOver}
+                            onDragEnter={handleDragEnter}
                             onDragLeave={handleDragLeave}
-                            className="w-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center transition-colors"
+                            className="relative w-full border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-8 text-center transition-colors"
                         >
+                             {isDragging && (
+                                <div className="absolute inset-0 bg-slate-800/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-10 border-2 border-teal-500">
+                                    <p className="text-xl font-bold text-teal-300">أفلت الصورة هنا</p>
+                                </div>
+                            )}
                             <ImageIcon className="w-16 h-16 mx-auto text-slate-400 mb-4" />
                             <h3 className="font-semibold text-slate-700 dark:text-slate-300">اسحب وأفلت صورة هنا</h3>
                             <p className="text-slate-500 dark:text-slate-400 text-sm">أو</p>
@@ -201,13 +225,13 @@ const ImageEditorTool: React.FC<ImageEditorToolProps> = ({ title, icon, onBack, 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                                 <div className="text-center">
                                     <h3 className="font-semibold mb-2">الصورة الأصلية</h3>
-                                    <img src={originalImage.preview} alt="Original" className="rounded-lg max-h-80 mx-auto" />
+                                    <img src={originalImage.preview} alt="الصورة الأصلية" className="rounded-lg max-h-80 mx-auto" />
                                     <button onClick={() => setOriginalImage(null)} className="mt-2 text-sm text-red-500 hover:underline">تغيير الصورة</button>
                                 </div>
                                 <div className="text-center">
                                     <h3 className="font-semibold mb-2">الصورة المعدلة</h3>
                                     <div className="w-full aspect-square bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
-                                        {isLoading ? <Spinner /> : editedImage ? <img src={editedImage} alt="Edited" className="rounded-lg max-h-80 mx-auto" /> : <p className="text-slate-500">النتيجة ستظهر هنا</p>}
+                                        {isLoading ? <Spinner /> : editedImage ? <img src={editedImage} alt="الصورة المعدلة" className="rounded-lg max-h-80 mx-auto" /> : <p className="text-slate-500">النتيجة ستظهر هنا</p>}
                                     </div>
                                 </div>
                             </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Conversation, MessagePart, View } from '../types';
 import NewChatIcon from './icons/NewChatIcon';

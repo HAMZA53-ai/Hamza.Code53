@@ -80,7 +80,7 @@ const Creations: React.FC = () => {
                             <img 
                                 src={src} 
                                 className="rounded-md object-cover aspect-square cursor-pointer hover:opacity-80 transition-opacity" 
-                                alt={`Generated image ${i}`} 
+                                alt={`صورة مولدة ${i}`} 
                                 onClick={() => setSelectedImage(src)}
                             />
                             <button

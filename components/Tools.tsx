@@ -10,6 +10,8 @@ import GenericTextTool from './GenericTextTool';
 import ImageEditorTool from './ImageEditorTool';
 import LogoGenerator from './LogoGenerator';
 import AudioTools from './AudioTools';
+import VideoGenerator from './VideoGenerator';
+import VideoTools from './VideoTools';
 
 
 // Import icons for the dashboard
@@ -20,6 +22,7 @@ import TranslateIcon from './icons/TranslateIcon';
 import AudioWaveIcon from './icons/AudioWaveIcon';
 import SparkleIcon from './icons/SparkleIcon';
 import ArticleIcon from './icons/ArticleIcon';
+import VideoIcon from './icons/VideoIcon';
 
 type ActiveTool = 
     | null
@@ -37,7 +40,9 @@ type ActiveTool =
     | 'product-description-generator'
     | 'copywriting-tools'
     | 'script-writer'
-    | 'audio-tools';
+    | 'audio-tools'
+    | 'video-generator'
+    | 'video-tools';
 
 interface ToolsProps {
     onNavigateToSettings: () => void;
@@ -52,6 +57,9 @@ const toolConfigs = {
     'image-upscaler': { component: ImageEditorTool, props: { title: 'تحسين جودة الصور', icon: <ImageIcon className="w-full h-full" />, editMode: 'upscale' } },
     'image-to-cartoon': { component: ImageEditorTool, props: { title: 'تحويل الصور لكرتون', icon: <ImageIcon className="w-full h-full" />, editMode: 'cartoonify' } },
     'background-remover': { component: ImageEditorTool, props: { title: 'إزالة الخلفيات', icon: <ImageIcon className="w-full h-full" />, editMode: 'background-remove' } },
+    // Video
+    'video-generator': { component: VideoGenerator, props: {} },
+    'video-tools': { component: VideoTools, props: {} },
     // Audio & Music
     'audio-tools': { component: AudioTools, props: {} },
     // Content & Writing
@@ -135,7 +143,7 @@ const Tools: React.FC<ToolsProps> = ({ onNavigateToSettings }) => {
                         <ToolCard icon={<ImageIcon className="w-full h-full" />} title="تحويل الصور لكرتون" description="أضف لمسة فنية على صورك بتحويلها إلى رسومات أو أنمي." onClick={() => setActiveTool('image-to-cartoon')} />
                         <ToolCard icon={<ImageIcon className="w-full h-full" />} title="إزالة الخلفيات" description="أزل خلفيات الصور بسهولة ودقة عالية." onClick={() => setActiveTool('background-remover')} />
                     </ToolCategory>
-
+                    
                     <ToolCategory title="✍️ المحتوى والكتابة">
                          <ToolCard icon={<WebsiteIcon className="w-full h-full" />} title="مولد المواقع" description="ابنِ صفحات ويب كاملة وجاهزة للنشر بمجرد وصف الفكرة." onClick={() => setActiveTool('website-generator')} />
                          <ToolCard icon={<TranslateIcon className="w-full h-full" />} title="الترجمة والتلخيص" description="ترجم النصوص بين لغات متعددة أو لخص المقالات الطويلة." onClick={() => setActiveTool('translation-summarization')} />
@@ -144,6 +152,11 @@ const Tools: React.FC<ToolsProps> = ({ onNavigateToSettings }) => {
                          <ToolCard icon={<ArticleIcon className="w-full h-full" />} title="توليد وصف منتجات" description="اكتب وصفًا جذابًا ومقنعًا لمنتجاتك لزيادة المبيعات." onClick={() => setActiveTool('product-description-generator')} />
                          <ToolCard icon={<ArticleIcon className="w-full h-full" />} title="أدوات كتابة إعلانية" description="أنشئ نصوصًا إعلانية فعالة لمنصات التواصل الاجتماعي وغيرها." onClick={() => setActiveTool('copywriting-tools')} />
                          <ToolCard icon={<ArticleIcon className="w-full h-full" />} title="كتابة سيناريوهات" description="اكتب سيناريوهات لمقاطع الفيديو أو البودكاست الخاصة بك." onClick={() => setActiveTool('script-writer')} />
+                    </ToolCategory>
+
+                    <ToolCategory title="🎬 الفيديو">
+                        <ToolCard icon={<VideoIcon className="w-full h-full" />} title="توليد الفيديو" description="حوّل أوصافك النصية إلى مقاطع فيديو متحركة." onClick={() => setActiveTool('video-generator')} />
+                        <ToolCard icon={<VideoIcon className="w-full h-full" />} title="مجموعة أدوات الفيديو" description="أدوات متنوعة لمعالجة وتحرير الفيديو بالذكاء الاصطناعي." onClick={() => setActiveTool('video-tools')} />
                     </ToolCategory>
 
                     <ToolCategory title="🎵 الصوت والموسيقى">

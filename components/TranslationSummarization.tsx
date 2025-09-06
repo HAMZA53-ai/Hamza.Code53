@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import Spinner from './Spinner';
 import TranslateIcon from './icons/TranslateIcon';
 import * as aiService from '../services/aiService';
 import CopyIcon from './icons/CopyIcon';
 import BackIcon from './icons/BackIcon';
+import { getToolSettings } from '../services/toolSettingsService';
 
 type ActiveTab = 'translate' | 'summarize';
 
@@ -12,10 +14,11 @@ interface TranslationSummarizationProps {
 }
 
 const TranslationSummarization: React.FC<TranslationSummarizationProps> = ({ onBack }) => {
+    const settings = getToolSettings();
     const [activeTab, setActiveTab] = useState<ActiveTab>('translate');
     const [inputText, setInputText] = useState('');
     const [outputText, setOutputText] = useState('');
-    const [targetLanguage, setTargetLanguage] = useState('English');
+    const [targetLanguage, setTargetLanguage] = useState(settings.translationSummarization?.targetLanguage || 'English');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [copySuccess, setCopySuccess] = useState(false);

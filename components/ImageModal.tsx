@@ -13,7 +13,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
     >
       <button 
         className="absolute top-4 right-4 text-white text-4xl hover:text-gray-300"
-        aria-label="Close image view"
+        aria-label="إغلاق عرض الصورة"
       >
         &times;
       </button>
@@ -23,7 +23,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ imageUrl, onClose }) => {
       >
         <img 
           src={imageUrl} 
-          alt="Full screen preview" 
+          alt="معاينة بملء الشاشة" 
           className="max-w-full max-h-[90vh] object-contain"
         />
       </div>

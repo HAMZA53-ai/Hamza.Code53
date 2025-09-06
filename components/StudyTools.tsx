@@ -6,9 +6,10 @@ import * as aiService from '../services/aiService';
 import { QuizQuestion, QuizType } from '../types';
 import GenericTextTool from './GenericTextTool';
 import SlidesGenerator from './SlidesGenerator';
+import * as toolSettingsService from '../services/toolSettingsService';
 
 
-// ADD: Import new icons for the dashboard
+// إضافة: استيراد أيقونات جديدة للوحة التحكم
 import BackIcon from './icons/BackIcon';
 import QuizIcon from './icons/QuizIcon';
 import MathIcon from './icons/MathIcon';
@@ -16,7 +17,7 @@ import SlidesIcon from './icons/SlidesIcon';
 
 type StudyTool = 'dashboard' | 'concept-explainer' | 'quiz-generator' | 'math-solver' | 'slides-generator';
 
-// ADD: Add onBack prop for navigation
+// إضافة: إضافة خاصية onBack للتنقل
 interface StudyToolsProps {
     onBack: () => void;
 }
@@ -102,9 +103,10 @@ const ConceptExplainerTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
 // Quiz Generator Tool Component
 const QuizGeneratorTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+    const settings = toolSettingsService.getToolSettings();
     const [text, setText] = useState('');
-    const [quizType, setQuizType] = useState<QuizType>('multiple-choice');
-    const [questionCount, setQuestionCount] = useState(5);
+    const [quizType, setQuizType] = useState<QuizType>(settings.quizGenerator?.quizType || 'multiple-choice');
+    const [questionCount, setQuestionCount] = useState(settings.quizGenerator?.questionCount || 5);
     const [quiz, setQuiz] = useState<QuizQuestion[]>([]);
     const [showAnswers, setShowAnswers] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -137,7 +139,7 @@ const QuizGeneratorTool: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         if (printContent) {
             const newWindow = window.open('', '', 'height=800,width=800');
             if (newWindow) {
-                newWindow.document.write('<html><head><title>Print Quiz</title>');
+                newWindow.document.write('<html><head><title>طباعة الاختبار</title>');
                 newWindow.document.write('<style>body{font-family: sans-serif; direction: rtl;} .question-block{margin-bottom: 20px;} .options-list{list-style: none; padding-right: 20px;} .option-item{margin-bottom: 8px;} .no-print{display: none;}</style>');
                 newWindow.document.write('</head><body>');
                 newWindow.document.write(printContent.innerHTML);
